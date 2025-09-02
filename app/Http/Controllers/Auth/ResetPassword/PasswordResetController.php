@@ -5,17 +5,20 @@ namespace App\Http\Controllers\Auth\ResetPassword;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\PasswordResetEmail;
 use Carbon\Carbon;
+use App\Http\Controllers\Auth\services\PasswordResetService;
+use Illuminate\Support\Facades\Hash;
 
 class PasswordResetController extends Controller
 {
-
+    /**
+     * Handle the forgot password request.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function forgotPassword(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -49,42 +52,24 @@ class PasswordResetController extends Controller
             ], 403);
         }
 
-        $contacto = $user->datos->contactos->where('tipo', 'PRINCIPAL')->first() ?? $user->datos->contactos->first();
-        if (!$contacto || !$contacto->email) {
-            return response()->json([
-                'message' => 'No se encontró un correo asociado. Contacta al soporte.',
-            ], 400);
+        // Check for existing valid token and resend if found
+        $existingTokenResult = PasswordResetService::checkExistingResetToken($user);
+        if ($existingTokenResult) {
+            return response()->json($existingTokenResult, $existingTokenResult['success'] ? 200 : 400);
         }
 
-        // Generate reset token
-        $resetToken = Str::random(60);
-        $expiresAt = now()->addMinutes(10);
-
-        // Delete any existing tokens for this user
-        DB::table('password_reset_tokens')
-            ->where('idUsuario', $user->idUsuario)
-            ->delete();
-
-        // Store new reset token
-        DB::table('password_reset_tokens')->insert([
-            'idUsuario' => $user->idUsuario,
-            'token' => $resetToken,
-            'ip_address' => $request->ip(),
-            'device' => $request->userAgent(),
-            'expires_at' => $expiresAt,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        // Send reset email
-        $resetUrl = config('app.url') . "/reset-password/{$user->idUsuario}/{$resetToken}";
-        Mail::to($contacto->email)->send(new PasswordResetEmail($user, $resetUrl));
-
-        return response()->json([
-            'message' => 'Se ha enviado un enlace de restablecimiento a tu correo. El enlace es válido por 10 minutos.',
-        ], 200);
+        // Handle new password reset request
+        $result = PasswordResetService::handlePasswordReset($user, $request->ip(), $request->userAgent());
+        return response()->json($result, $result['success'] ? 200 : 400);
     }
 
+    /**
+     * Display the password reset form.
+     *
+     * @param string $idUsuario
+     * @param string $token
+     * @return \Illuminate\View\View
+     */
     public function showResetForm($idUsuario, $token)
     {
         $resetToken = DB::table('password_reset_tokens')
@@ -114,6 +99,14 @@ class PasswordResetController extends Controller
         ]);
     }
 
+    /**
+     * Handle the password reset submission.
+     *
+     * @param Request $request
+     * @param string $idUsuario
+     * @param string $token
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function reset(Request $request, $idUsuario, $token)
     {
         $resetToken = DB::table('password_reset_tokens')
