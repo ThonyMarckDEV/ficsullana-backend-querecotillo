@@ -1,6 +1,7 @@
 <?php
 
-use App\Http\Controllers\PasswordResetController;
+
+use App\Http\Controllers\ResetPassword\PasswordResetController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {

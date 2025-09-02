@@ -56,8 +56,8 @@ class AuthController extends Controller
             ], 403);
         }
 
-        // Check for existing reset token or password matching DNI for clients (idRol = 2)
-        if ($user->idRol === 2) {
+        // Check for existing reset token or password matching DNI for clients (idRol = 3)
+        if ($user->idRol === 3) {
             // Check existing reset token
             $existingReset = PasswordResetService::checkExistingResetToken($user);
             if ($existingReset) {

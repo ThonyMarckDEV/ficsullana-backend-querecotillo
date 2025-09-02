@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
-use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\ResetPassword\PasswordResetController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login']);
@@ -10,7 +10,7 @@ Route::post('/refresh', [AuthController::class, 'refresh']);
 
 Route::post('/validate-refresh-token', [AuthController::class, 'validateRefreshToken']);
 
-Route::post('/forgot-password', [PasswordResetController::class, 'forgotPassword'])->name('password.forgot');
+Route::post('/forgot-password', [PasswordResetController::class, 'forgotPassword']);
 
 // RUTAS PARA cliente VALIDADA POR MIDDLEWARE AUTH (PARA TOKEN JWT) Y CHECKROLE (PARA VALIDAR ROL DEL TOKEN)
 Route::middleware(['auth.jwt', 'checkRoleMW:admin'])->group(function () { 
