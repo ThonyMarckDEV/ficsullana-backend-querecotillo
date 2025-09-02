@@ -47,5 +47,6 @@ Route::middleware(['auth.jwt', 'CheckRolesMW_ADMIN_CLIENTE'])->group(function ()
 // RUTAS PARA VARIOS ROLES
 Route::middleware(['auth.jwt', 'checkRolesMW'])->group(function () { 
 
+    Route::post('/logout', [AuthController::class, 'logout']);
 
 });
