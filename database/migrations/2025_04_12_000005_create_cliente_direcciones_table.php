@@ -15,13 +15,13 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('id_Datos');
             $table->enum('tipo', ['FISCAL', 'CORRESPONDENCIA'])->nullable();
-            $table->string('tipoVia')->nullable();
-            $table->string('nombreVia')->nullable();
-            $table->string('numeroMz')->nullable();
-            $table->string('urbanizacion');
+            $table->string('direccion');
             $table->string('departamento');
             $table->string('provincia');
             $table->string('distrito');
+            $table->string('tipoVivienda')->comment('Ejemplo: Propia, Alquilada, Familiar, etc.');
+            $table->string('tiempoResidencia')->comment('Ejemplo: 1 año, 2 años, etc.');
+            $table->string('ReferenciaDomicilio');
             $table->timestamps();
         
             $table->foreign('id_Datos')->references('id')->on('datos')->onDelete('cascade');
