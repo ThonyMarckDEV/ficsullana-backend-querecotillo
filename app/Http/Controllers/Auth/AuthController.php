@@ -129,7 +129,7 @@ class AuthController extends Controller
 
             // Generate new access token only
             $accessToken = TokenService::generateAccessToken($user, $request->ip(), $request->userAgent());
-            Log::info('Nuevo access token generado para usuario: ' . $user->idUsuario);
+            Log::info('Nuevo access token generado para usuario: ' . $user->id);
 
             return response()->json([
                 'message' => 'Token actualizado',
@@ -233,7 +233,7 @@ class AuthController extends Controller
 
         // Delete refresh token
         $deleted = DB::table('refresh_tokens')
-            ->where('idToken', $request->idToken)
+            ->where('id', $request->idToken)
             ->delete();
 
         if ($deleted) {

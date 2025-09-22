@@ -19,13 +19,6 @@ class User extends Authenticatable implements JWTSubject
     protected $table = 'usuarios';
 
     /**
-     * La clave primaria asociada con la tabla.
-     *
-     * @var string
-     */
-    protected $primaryKey = 'idUsuario';
-
-    /**
      * Los atributos que se pueden asignar de manera masiva.
      *
      * @var array<string>

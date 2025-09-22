@@ -66,7 +66,7 @@ class AuthValidations
     public static function validateLogout(Request $request)
     {
         return Validator::make($request->all(), [
-            'idToken' => 'required|integer|exists:refresh_tokens,idToken',
+            'idToken' => 'required|integer|exists:refresh_tokens,id',
         ], [
             'idToken.required' => 'El ID del token es obligatorio.',
             'idToken.exists' => 'El token especificado no existe.',

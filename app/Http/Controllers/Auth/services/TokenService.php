@@ -107,7 +107,7 @@ class TokenService
             'exp' => $now + $accessTtl,
             'nbf' => $now,
             'jti' => Str::random(16),
-            'sub' => $user->idUsuario,
+            'sub' => $user->id,
             'prv' => sha1(config('app.key')),
             'rol' => $user->rol->nombre,
             'username' => $user->username,

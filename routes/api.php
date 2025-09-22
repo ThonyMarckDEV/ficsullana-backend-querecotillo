@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\AuthController;
 
 use App\Http\Controllers\Auth\ResetPassword\PasswordResetController;
+use App\Http\Controllers\SolicitudPrestamo\SolicitudPrestamo;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login']);
@@ -24,6 +25,15 @@ Route::middleware(['auth.jwt', 'checkRoleMW:cliente'])->group(function () {
 
 
 });
+
+// RUTAS PARA cliente VALIDADA POR MIDDLEWARE AUTH (PARA TOKEN JWT) Y CHECKROLE (PARA VALIDAR ROL DEL TOKEN)
+Route::middleware(['auth.jwt', 'checkRoleMW:asesor'])->group(function () { 
+
+
+    Route::post('/solicitudes/create', [SolicitudPrestamo::class, 'store']);
+
+});
+
 
 
 // RUTAS PARA ROL ADMIN Y ASESOR
