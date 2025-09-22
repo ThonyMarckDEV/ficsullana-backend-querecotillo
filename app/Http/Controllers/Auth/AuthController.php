@@ -177,7 +177,7 @@ class AuthController extends Controller
         try {
             // Check refresh token in database
             $refreshToken = DB::table('refresh_tokens')
-                ->where('idToken', $request->refresh_token_id)
+                ->where('id', $request->refresh_token_id)
                 ->where('id_Usuario', $request->userID)
                 ->first();
 
