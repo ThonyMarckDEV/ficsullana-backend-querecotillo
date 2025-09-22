@@ -3,7 +3,7 @@
 use App\Http\Controllers\Auth\AuthController;
 
 use App\Http\Controllers\Auth\ResetPassword\PasswordResetController;
-use App\Http\Controllers\SolicitudPrestamo\SolicitudPrestamo;
+use App\Http\Controllers\EvaluacionCliente\EvaluacionCliente;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login']);
@@ -30,7 +30,7 @@ Route::middleware(['auth.jwt', 'checkRoleMW:cliente'])->group(function () {
 Route::middleware(['auth.jwt', 'checkRoleMW:asesor'])->group(function () { 
 
 
-    Route::post('/solicitudes/create', [SolicitudPrestamo::class, 'store']);
+    Route::post('/evaluaciones/create', [EvaluacionCliente::class, 'store']);
 
 });
 

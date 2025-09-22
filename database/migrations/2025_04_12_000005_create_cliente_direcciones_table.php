@@ -11,13 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('contactos', function (Blueprint $table) {
+        Schema::create('direcciones', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('id_Datos');
-            $table->enum('tipo', ['PRINCIPAL', 'SECUNDARIO']);
-            $table->string('telefono')->unique();
-            $table->string('telefonoDos')->nullable()->unique();
-            $table->string('email')->nullable()->unique();
+            $table->enum('tipo', ['FISCAL', 'CORRESPONDENCIA'])->nullable();
+            $table->string('tipoVia')->nullable();
+            $table->string('nombreVia')->nullable();
+            $table->string('numeroMz')->nullable();
+            $table->string('urbanizacion');
+            $table->string('departamento');
+            $table->string('provincia');
+            $table->string('distrito');
             $table->timestamps();
         
             $table->foreign('id_Datos')->references('id')->on('datos')->onDelete('cascade');
@@ -29,6 +33,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('cliente_contactos');
+        Schema::dropIfExists('direcciones');
     }
 };

@@ -1,20 +1,27 @@
 <?php
 
-namespace App\Http\Controllers\SolicitudPrestamo;
+namespace App\Http\Controllers\EvaluacionCliente;
 
+use App\Http\Controllers\EvaluacionCliente\utilities\EvaluacionClienteUtils;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Log;
 
-class SolicitudPrestamo extends Controller
+class EvaluacionCliente extends Controller
 {
     public function store(Request $request)
     {
-        // Obtenemos "data" (string JSON)
-        $data = $request->input('data');
+        // Obtnemos data y Decodificamos el JSON recibido 
+       $data = json_decode($request->input('data'), true);
 
-        // Lo convertimos en array
-        $data = json_decode($data, true);
+        $validator = EvaluacionClienteUtils::StoreValidate($data);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'msg'   => 'Errores de validación',
+                'errors'=> $validator->errors()
+            ], 422);
+        }
 
         // Accedemos a cada bloque
         $usuario   = $data['usuario'] ?? [];
@@ -28,16 +35,8 @@ class SolicitudPrestamo extends Controller
         Log::info('Monto del préstamo: ' . $montoPrestamo);
 
 
-        // Si quieres también manejar el PDF
-        // if ($request->hasFile('pdf')) {
-        //     $pdfFile = $request->file('pdf');
-        //     $pdfPath = $pdfFile->store('solicitudes'); // lo guarda en storage/app/solicitudes
-        // }
-
         return response()->json([
             'msg'     => 'Datos procesados correctamente',
-            'usuario' => $nombreUsuario,
-            'monto' => $montoPrestamo,
         ]);
     }
 
