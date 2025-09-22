@@ -10,7 +10,6 @@ class Datos extends Model
     use HasFactory;
 
     protected $table = 'datos';
-    protected $primaryKey = 'idDatos';
 
     protected $fillable = [
         'nombre',
@@ -35,23 +34,9 @@ class Datos extends Model
         return $this->hasOne(User::class, 'idDatos', 'idDatos');
     }
 
-    public function direcciones()
-    {
-        return $this->hasMany(Direccion::class, 'idDatos');
-    }
-
     public function contactos()
     {
         return $this->hasMany(Contacto::class, 'idDatos');
     }
-
-    public function cuentasBancarias()
-    {
-        return $this->hasMany(CuentaBancaria::class, 'idDatos', 'idDatos');
-    }
     
-    public function actividadesEconomicas()
-    {
-        return $this->hasMany(ActividadEconomica::class, 'idDatos');
-    }
 }

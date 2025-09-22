@@ -9,12 +9,9 @@ class RefreshToken extends Model
 {
     use HasFactory;
 
-    protected $table = 'refresh_tokens'; // Nombre de la tabla personalizada
-
-    protected $primaryKey = 'idToken'; // Clave primaria personalizada
-
+    protected $table = 'refresh_tokens';
     protected $fillable = [
-        'idUsuario',
+        'id_Usuario',
         'refresh_token',
         'expires_at',
     ];

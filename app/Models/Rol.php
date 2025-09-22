@@ -17,13 +17,6 @@ class Rol extends Model
     protected $table = 'roles';
 
     /**
-     * La clave primaria asociada con la tabla.
-     *
-     * @var string
-     */
-    protected $primaryKey = 'idRol';
-
-    /**
      * Los atributos que se pueden asignar de manera masiva.
      *
      * @var array<string>
@@ -39,6 +32,6 @@ class Rol extends Model
      */
     public function usuarios()
     {
-        return $this->hasMany(User::class, 'idRol', 'idRol');
+        return $this->hasMany(User::class, 'id_Rol', 'id');
     }
 }

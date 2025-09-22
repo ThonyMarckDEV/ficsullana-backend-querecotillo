@@ -13,7 +13,7 @@ class Contacto extends Model
     protected $primaryKey = 'idContacto';
 
     protected $fillable = [
-        'idDatos',
+        'id_Datos',
         'tipo',
         'telefono',
         'telefonoDos',
@@ -22,6 +22,6 @@ class Contacto extends Model
 
     public function datos()
     {
-        return $this->belongsTo(Datos::class, 'idDatos');
+        return $this->belongsTo(Datos::class, 'id_Datos');
     }
 }

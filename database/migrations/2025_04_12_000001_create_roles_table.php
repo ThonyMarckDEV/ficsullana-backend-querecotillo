@@ -10,7 +10,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('roles', function (Blueprint $table) {
-            $table->bigIncrements('idRol');
+            $table->id();
             $table->string('nombre')->unique();
             $table->string('descripcion')->nullable();
             $table->boolean('estado')->default(1);
@@ -22,7 +22,7 @@ return new class extends Migration
             ['nombre' => 'superadmin', 'descripcion' => 'Super Administrador del sistema', 'estado' => true, 'created_at' => now(), 'updated_at' => now()],
             ['nombre' => 'admin', 'descripcion' => 'Administrador del sistema', 'estado' => true, 'created_at' => now(), 'updated_at' => now()],
             ['nombre' => 'cliente', 'descripcion' => 'Cliente del sistema', 'estado' => true, 'created_at' => now(), 'updated_at' => now()],
-            ['nombre' => 'asesor', 'descripcion' => 'Gestor del sistema', 'estado' => true, 'created_at' => now(), 'updated_at' => now()],
+            ['nombre' => 'asesor', 'descripcion' => 'Asesor del sistema', 'estado' => true, 'created_at' => now(), 'updated_at' => now()],
             ['nombre' => 'auditor', 'descripcion' => 'Auditor del sistema', 'estado' => true, 'created_at' => now(), 'updated_at' => now()],
             ['nombre' => 'cajero', 'descripcion' => 'Cajero del sistema', 'estado' => true, 'created_at' => now(), 'updated_at' => now()],
         ]);

@@ -12,15 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('contactos', function (Blueprint $table) {
-            $table->bigIncrements('idContacto');
-            $table->unsignedBigInteger('idDatos');
+            $table->id();
+            $table->unsignedBigInteger('id_Datos');
             $table->enum('tipo', ['PRINCIPAL', 'SECUNDARIO']);
             $table->string('telefono')->unique();
             $table->string('telefonoDos')->nullable()->unique();
             $table->string('email')->nullable()->unique();
             $table->timestamps();
         
-            $table->foreign('idDatos')->references('idDatos')->on('datos')->onDelete('cascade');
+            $table->foreign('id_Datos')->references('id')->on('datos')->onDelete('cascade');
         });
     }
 

@@ -8,17 +8,17 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('usuarios', function (Blueprint $table) {
-            $table->bigIncrements('idUsuario');
+            $table->id();
             $table->string('username')->unique()->nullable();
             $table->string('password')->nullable();
-            $table->unsignedBigInteger('idDatos')->nullable();
-            $table->unsignedBigInteger('idRol')->default(2); // Por defecto 2 que es cliente
+            $table->unsignedBigInteger('id_Datos')->nullable();
+            $table->unsignedBigInteger('id_Rol')->default(2); // Por defecto 2 que es cliente
             $table->boolean('estado')->default(1)->comment('1: Activo, 0: Inactivo');
             $table->timestamps();
             
             // Foreign keys
-            $table->foreign('idDatos')->references('idDatos')->on('datos')->onDelete('cascade');
-            $table->foreign('idRol')->references('idRol')->on('roles')->onDelete('restrict');
+            $table->foreign('id_Datos')->references('id')->on('datos')->onDelete('cascade');
+            $table->foreign('id_Rol')->references('id')->on('roles')->onDelete('restrict');
         });
     }
 

@@ -89,7 +89,7 @@ class User extends Authenticatable implements JWTSubject
      */
     public function datos()
     {
-        return $this->belongsTo(Datos::class, 'idDatos', 'idDatos');
+        return $this->belongsTo(Datos::class, 'id_Datos', 'id');
     }
 
     /**
@@ -97,17 +97,8 @@ class User extends Authenticatable implements JWTSubject
      */
     public function rol()
     {
-        return $this->belongsTo(Rol::class, 'idRol', 'idRol');
+        return $this->belongsTo(Rol::class, 'id_Rol', 'id');
     }
 
-    public function clienteAval()
-    {
-        return $this->hasOne(ClienteAval::class, 'idCliente', 'idUsuario');
-    }
-
-    public function prestamos()
-    {
-        return $this->hasMany(Prestamo::class, 'idCliente', 'idUsuario');
-    }
 
 }

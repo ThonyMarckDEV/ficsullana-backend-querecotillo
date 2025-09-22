@@ -8,14 +8,15 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('refresh_tokens', function (Blueprint $table) {
-            $table->bigIncrements('idToken');
-            $table->unsignedBigInteger('idUsuario');
-            $table->foreign('idUsuario')->references('idUsuario')->on('usuarios')->onDelete('cascade');
+            $table->id();
+            $table->unsignedBigInteger('id_Usuario');
             $table->text('refresh_token');
             $table->string('ip_address')->nullable();
             $table->string('device')->nullable();
             $table->timestamp('expires_at')->nullable();
             $table->timestamps();
+
+            $table->foreign('id_Usuario')->references('id')->on('usuarios')->onDelete('cascade');
         });
     }
 
