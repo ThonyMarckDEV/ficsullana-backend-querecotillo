@@ -15,6 +15,7 @@ return new class extends Migration
             $table->string('apellidoMaterno');
             $table->string('apellidoConyuge')->nullable();
             $table->string('estadoCivil');
+            $table->string('sexo')->comment('M: Masculino, F: Femenino');
             $table->string('dni', 9)->unique();
             $table->date('fechaCaducidadDni');
             $table->string('ruc', 11)->nullable()->unique();

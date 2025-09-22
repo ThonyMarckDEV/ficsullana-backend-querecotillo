@@ -17,6 +17,7 @@ class Datos extends Model
         'apellidoMaterno',
         'apellidoConyuge',
         'estadoCivil',
+        'sexo',
         'dni',
         'fechaCaducidadDni',
         'ruc',
