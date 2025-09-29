@@ -12,7 +12,7 @@ return new class extends Migration {
             $table->string('username')->unique()->nullable();
             $table->string('password')->nullable();
             $table->unsignedBigInteger('id_Datos')->nullable();
-            $table->unsignedBigInteger('id_Rol')->default(2); // Por defecto 2 que es cliente
+            $table->unsignedBigInteger('id_Rol')->default(3); // Por defecto 3 que es cliente
             $table->tinyInteger('estado')->default(1)->comment('0: Inactivo , 1: Activo, ');
             $table->timestamps();
             
