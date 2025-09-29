@@ -33,7 +33,7 @@ class ProcesarEvaluacion
 
         try {
             // Iniciamos una transacción de base de datos
-            $resultado = DB::transaction(function () use ($usuarioData, $avalData) {
+            $resultado = DB::transaction(function () use ($usuarioData, $creditoData , $avalData) {
                 
                 // 1. Crear el registro en la tabla 'datos'
                 $datos = Datos::create([
@@ -124,13 +124,13 @@ class ProcesarEvaluacion
                 // 8. Subir la Evaluacion de Cliente (¡LA PARTE NUEVA!)
                 EvaluacionCliente::create([
                     'id_Cliente'        => $usuario->id,
-                    'producto'          => $usuarioData['producto'],
-                    'monto_prestamo'    => $usuarioData['montoPrestamo'],
-                    'tasa_interes'      => $usuarioData['tasaInteres'],
-                    'cuotas'            => $usuarioData['cuotas'],
-                    'modalidad_credito' => $usuarioData['modalidad'],
-                    'destino_credito'   => $usuarioData['destinoCredito'],
-                    'periodo_credito'   => $usuarioData['periodoCredito'],
+                    'producto'          => $creditoData['producto'],
+                    'monto_prestamo'    => $creditoData['montoPrestamo'],
+                    'tasa_interes'      => $creditoData['tasaInteres'],
+                    'cuotas'            => $creditoData['cuotas'],
+                    'modalidad_credito' => $creditoData['modalidad'],
+                    'destino_credito'   => $creditoData['destinoCredito'],
+                    'periodo_credito'   => $creditoData['periodoCredito'],
                     // El estado y observaciones tienen valores por defecto o son nulos
                 ]);
 
