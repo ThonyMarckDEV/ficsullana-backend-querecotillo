@@ -18,134 +18,91 @@ use Throwable;
 
 class ProcesarEvaluacion
 {
-    /**
-     * Procesa y guarda toda la información de la evaluación del cliente.
-     * Utiliza una transacción para garantizar la integridad de los datos.
-     *
-     * @param array $data Los datos validados del request.
-     * @return array Un array con el estado del proceso y un mensaje.
-     */
     public static function execute(array $data): array
     {
-        // Extraemos los bloques de datos principales
         $usuarioData = $data['usuario'];
-        $creditoData = $data['credito']; // Aunque no se usa para guardar, lo extraemos por consistencia
-        $avalData    = $data['aval'] ?? null; // El aval es opcional
+        $creditoData = $data['credito'];
+        $avalData    = $data['aval'] ?? null;
 
         try {
-            // Iniciamos una transacción de base de datos
-            $resultado = DB::transaction(function () use ($usuarioData, $creditoData , $avalData) {
+            $resultado = DB::transaction(function () use ($usuarioData, $creditoData, $avalData) {
                 
-                // 1. Crear el registro en la tabla 'datos'
-                $datos = Datos::create([
-                    'nombre' => $usuarioData['nombre'],
-                    'apellidoPaterno' => $usuarioData['apellidoPaterno'],
-                    'apellidoMaterno' => $usuarioData['apellidoMaterno'],
-                    'apellidoConyuge' => $usuarioData['apellidoConyuge'] ?? null,
-                    'estadoCivil' => $usuarioData['estadoCivil'],
-                    'sexo' => $usuarioData['sexo'],
-                    'dni' => $usuarioData['dni'],
-                    'fechaCaducidadDni' => $usuarioData['fechaCaducidadDni'],
-                    'fechaNacimiento'=> $usuarioData['fechaNacimiento'],
-                    'nacionalidad' => $usuarioData['nacionalidad'],
-                    'residePeru' => $usuarioData['residePeru'],
-                    'nivelEducativo' => $usuarioData['nivelEducativo'],
-                    'profesion' => $usuarioData['profesion'],
-                    'enfermedadesPreexistentes' => $usuarioData['enfermedadesPreexistentes'],
-                    'ruc' => $usuarioData['ruc'] ?? null,
-                    'expuestaPoliticamente' => $usuarioData['expuestaPoliticamente'] ?? false,
-                ]);
+                $datos = null;
+                $usuario = null;
 
-                // 2. Crear el 'usuario' con la contraseña igual al DNI (hasheada)
-                $usuario = User::create([
-                    'username' => $usuarioData['dni'],
-                    'password' => Hash::make($usuarioData['dni']),
-                    'id_Datos' => $datos->id,
-                    // id_Rol y estado tienen valores por defecto en la migración
-                ]);
-
-                // 3. Crear la 'direccion'
-                Direccion::create([
-                    'id_Datos' => $datos->id,
-                    'direccionFiscal' => $usuarioData['direccionFiscal'],
-                    'direccionCorrespondencia' => $usuarioData['direccionCorrespondencia'],
-                    'departamento' => $usuarioData['departamento'],
-                    'provincia' => $usuarioData['provincia'],
-                    'distrito' => $usuarioData['distrito'],
-                    'tipoVivienda' => $usuarioData['tipoVivienda'],
-                    'tiempoResidencia' => $usuarioData['tiempoResidencia'],
-                    'referenciaDomicilio' => $usuarioData['referenciaDomicilio'],
-                ]);
-
-                // 4. Crear el 'contacto'
-                Contacto::create([
-                    'id_Datos' => $datos->id,
-                    'tipo' => 'PRINCIPAL', // O según venga en el JSON
-                    'telefonoMovil' => $usuarioData['telefonoMovil'],
-                    'telefonoFijo' => $usuarioData['telefonoFijo'] ?? null,
-                    'correo' => $usuarioData['correo'] ?? null,
-                ]);
+                // --- LÓGICA CORREGIDA PARA MANEJAR CLIENTES NUEVOS Y EXISTENTES ---
                 
-                // 5. Crear la 'cuenta_bancaria'
-                CuentaBancaria::create([
-                    'id_Datos' => $datos->id,
-                    'ctaAhorros' => $usuarioData['ctaAhorros'],
-                    'cci' => $usuarioData['cci'] ?? null,
-                    'entidadFinanciera' => $usuarioData['entidadFinanciera'],
-                ]);
+                // Verificamos si el cliente ya existe (si el frontend nos envió un 'id')
+                if (isset($usuarioData['id']) && $usuarioData['id']) {
+                    
+                    // --- CASO: CLIENTE EXISTENTE ---
+                    Log::info("Cliente existente encontrado. ID de Datos: {$usuarioData['id']}");
+                    
+                    // 1. Buscamos sus datos y su usuario
+                    $datos = Datos::findOrFail($usuarioData['id']);
+                    $usuario = $datos->usuario;
+                    
+                    // 2. Actualizamos sus datos por si el asesor hizo algún cambio
+                    // El método updateOrCreate buscará por el primer array y actualizará con el segundo.
+                    // Esto es seguro tanto para clientes nuevos como existentes.
+                    $datos->contactos()->updateOrCreate(['id_Datos' => $datos->id], $usuarioData);
+                    $datos->direcciones()->updateOrCreate(['id_Datos' => $datos->id], $usuarioData);
+                    $datos->empleos()->updateOrCreate(['id_Datos' => $datos->id], $usuarioData);
+                    $datos->cuentasBancarias()->updateOrCreate(['id_Datos' => $datos->id], $usuarioData);
 
-                // 6. Crear el 'empleo'
-                ClienteEmpleo::create([
-                    'id_Datos' => $datos->id,
-                    'centroLaboral' => $usuarioData['centroLaboral'],
-                    'ingresoMensual' => $usuarioData['ingresoMensual'],
-                    'inicioLaboral' => $usuarioData['inicioLaboral'],
-                    'situacionLaboral' => $usuarioData['situacionLaboral'],
-                ]);
+                } else {
+                    
+                    // --- CASO: CLIENTE NUEVO ---
+                    Log::info("Registrando cliente nuevo con DNI: {$usuarioData['dni']}");
 
-                // 7. Si existe un aval, crearlo
-                if ($avalData) {
-                    ClienteAval::create([
-                        'id_Cliente' => $usuario->id, // El FK es con la tabla usuarios
-                        'dniAval' => $avalData['dniAval'],
-                        'apellidoPaternoAval' => $avalData['apellidoPaternoAval'],
-                        'apellidoMaternoAval' => $avalData['apellidoMaternoAval'],
-                        'nombresAval' => $avalData['nombresAval'],
-                        'telefonoFijoAval' => $avalData['telefonoFijoAval'],
-                        'telefonoMovilAval' => $avalData['telefonoMovilAval'],
-                        'direccionAval' => $avalData['direccionAval'],
-                        'referenciaDomicilioAval' => $avalData['referenciaDomicilioAval'],
-                        'departamentoAval' => $avalData['departamentoAval'],
-                        'provinciaAval' => $avalData['provinciaAval'],
-                        'distritoAval' => $avalData['distritoAval'],
-                        'relacionClienteAval' => $avalData['relacionClienteAval'],
+                    // 1. Crear el registro en la tabla 'datos'
+                    $datos = Datos::create($usuarioData);
+
+                    // 2. Crear el 'usuario'
+                    $usuario = User::create([
+                        'username' => $usuarioData['dni'],
+                        'password' => Hash::make($usuarioData['dni']),
+                        'id_Datos' => $datos->id,
                     ]);
+
+                    // 3. Crear sus datos relacionados
+                    Direccion::create(array_merge($usuarioData, ['id_Datos' => $datos->id]));
+                    Contacto::create(array_merge($usuarioData, ['id_Datos' => $datos->id]));
+                    CuentaBancaria::create(array_merge($usuarioData, ['id_Datos' => $datos->id]));
+                    ClienteEmpleo::create(array_merge($usuarioData, ['id_Datos' => $datos->id]));
                 }
 
-                
-                // 8. Subir la Evaluacion de Cliente
+                // --- LÓGICA COMÚN PARA AMBOS CASOS ---
+
+                // 4. Procesar el Aval
+                if ($avalData && !empty($avalData['dniAval'])) {
+                    // Busca un aval para este cliente, si existe lo actualiza, si no, lo crea.
+                    $usuario->avales()->updateOrCreate(['id_Cliente' => $usuario->id], $avalData);
+                } else {
+                    // Si no se envía un aval, nos aseguramos que no haya ninguno antiguo
+                    $usuario->avales()->delete();
+                }
+
+                // 5. SIEMPRE se crea una NUEVA evaluación
                 EvaluacionCliente::create([
-                    'id_Asesor'=> Auth::user()->id, //ID DEL ASESOR
+                    'id_Asesor'         => Auth::id(),
                     'id_Cliente'        => $usuario->id,
                     'producto'          => $creditoData['producto'],
-                    'montoPrestamo'    => $creditoData['montoPrestamo'],
-                    'tasaInteres'      => $creditoData['tasaInteres'],
+                    'montoPrestamo'     => $creditoData['montoPrestamo'],
+                    'tasaInteres'       => $creditoData['tasaInteres'],
                     'cuotas'            => $creditoData['cuotas'],
-                    'modalidadCredito' => $creditoData['modalidadCredito'],
-                    'destinoCredito'   => $creditoData['destinoCredito'],
-                    'periodoCredito'   => $creditoData['periodoCredito'],
-                    // El estado y observaciones tienen valores por defecto o son nulos
+                    'modalidadCredito'  => $creditoData['modalidadCredito'],
+                    'destinoCredito'    => $creditoData['destinoCredito'],
+                    'periodoCredito'    => $creditoData['periodoCredito'],
                 ]);
 
-                // Si todo fue exitoso, retornamos el ID del nuevo usuario
                 return $usuario->id;
             });
             
-            Log::info("Cliente y evaluación creados exitosamente. ID de Usuario: {$resultado}");
+            Log::info("Evaluación procesada exitosamente. ID de Usuario: {$resultado}");
             return ['success' => true, 'message' => 'Datos procesados y guardados correctamente.', 'usuario_id' => $resultado];
 
         } catch (Throwable $e) {
-            // Si algo falla, la transacción hará un rollback automático.
             Log::error("Error al procesar la evaluación del cliente: " . $e->getMessage(), [
                 'trace' => $e->getTraceAsString()
             ]);

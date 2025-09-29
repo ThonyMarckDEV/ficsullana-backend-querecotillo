@@ -30,7 +30,7 @@ class EvaluacionClienteUtils
             'usuario.telefonoFijo'          => 'nullable|digits_between:6,9',
             'usuario.telefonoMovil'         => 'required|digits:9',
             'usuario.correo'                => 'required|email|max:150',
-            'usuario.enfermedadesPreexistentes' => 'nullable|string|max:255',
+            'usuario.enfermedadesPreexistentes' => 'required|boolean',
             'usuario.ctaAhorros'            => 'required|string|max:50',
             'usuario.entidadFinanciera'     => 'required|string|max:100',
             'usuario.direccionFiscal'       => 'required|string|max:255',
@@ -45,7 +45,7 @@ class EvaluacionClienteUtils
             'usuario.provincia'             => 'required|string|max:100',
             'usuario.departamento'          => 'required|string|max:100',
             'usuario.distrito'              => 'required|string|max:100',
-            'usuario.expuestaPoliticamente'=> 'nullable|string|max:255',
+            'usuario.expuestaPoliticamente'=> 'required|boolean',
 
             // CAMPOS CRÉDITO
             'credito.producto'              => 'required|string|max:100',
@@ -57,7 +57,7 @@ class EvaluacionClienteUtils
             'credito.periodoCredito'        => 'required|string|max:50',
             
             // CAMPOS AVAL (solo si existe el bloque aval en el request)
-            'aval.dniAval'                 => 'sometimes|required|digits:8',
+            'aval.dniAval'                 => 'sometimes|required|digits_between:8,9',
             'aval.apellidoPaternoAval'     => 'sometimes|required|string|max:100',
             'aval.apellidoMaternoAval'     => 'sometimes|nullable|string|max:100',
             'aval.nombresAval'             => 'sometimes|required|string|max:100',
