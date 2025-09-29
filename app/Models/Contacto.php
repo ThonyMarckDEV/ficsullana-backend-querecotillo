@@ -10,7 +10,6 @@ class Contacto extends Model
     use HasFactory;
 
     protected $table = 'contactos';
-    protected $primaryKey = 'idContacto';
 
     protected $fillable = [
         'id_Datos',
@@ -22,6 +21,6 @@ class Contacto extends Model
 
     public function datos()
     {
-        return $this->belongsTo(Datos::class, 'id_Datos');
+        return $this->belongsTo(Datos::class, 'id_Datos' , 'id');
     }
 }

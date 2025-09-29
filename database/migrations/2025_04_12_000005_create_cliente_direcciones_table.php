@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('distrito');
             $table->string('tipoVivienda')->comment('Ejemplo: Propia, Alquilada, Familiar, etc.');
             $table->string('tiempoResidencia')->comment('Ejemplo: 1 año, 2 años, etc.');
-            $table->string('ReferenciaDomicilio');
+            $table->string('referenciaDomicilio');
             $table->timestamps();
         
             $table->foreign('id_Datos')->references('id')->on('datos')->onDelete('cascade');

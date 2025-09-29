@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('estadoCivil');
             $table->string('sexo')->comment('M: Masculino, F: Femenino');
             $table->string('dni', 9)->unique();
+            $table->date('fechaNacimiento');
             $table->date('fechaCaducidadDni');
             $table->string('nacionalidad');
             $table->boolean('residePeru');

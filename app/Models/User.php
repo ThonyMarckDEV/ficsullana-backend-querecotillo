@@ -93,5 +93,13 @@ class User extends Authenticatable implements JWTSubject
         return $this->belongsTo(Rol::class, 'id_Rol', 'id');
     }
 
+    /**
+     * Relación con avales
+     */
+    public function avales()
+    {
+        return $this->hasMany(ClienteAval::class, 'id_Cliente', 'id');
+    }
+
 
 }

@@ -20,6 +20,7 @@ class Datos extends Model
         'sexo',
         'dni',
         'fechaCaducidadDni',
+        'fechaNacimiento',
         'nacionalidad',
         'residePeru',
         'nivelEducativo',
@@ -37,12 +38,29 @@ class Datos extends Model
 
     public function usuario()
     {
-        return $this->hasOne(User::class, 'idDatos', 'idDatos');
+        return $this->hasOne(User::class, 'id_Datos', 'id');
     }
 
     public function contactos()
     {
-        return $this->hasMany(Contacto::class, 'idDatos');
+        return $this->hasMany(Contacto::class, 'id_Datos' , 'id');
     }
+
+
+    public function direcciones()
+    {
+        return $this->hasMany(Direccion::class, 'id_Datos' , 'id');
+    }
+
+    public function empleos()
+    {
+        return $this->hasMany(ClienteEmpleo::class, 'id_Datos' , 'id');
+    }
+
+     public function cuentasBancarias()
+    {
+        return $this->hasMany(CuentaBancaria::class, 'id_Datos' , 'id');
+    }
+
     
 }
