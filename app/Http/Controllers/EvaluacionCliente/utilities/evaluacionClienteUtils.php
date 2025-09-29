@@ -67,7 +67,7 @@ class EvaluacionClienteUtils
             'aval.provinciaAval'           => 'sometimes|required|string|max:100',
             'aval.departamentoAval'        => 'sometimes|required|string|max:100',
             'aval.distritoAval'            => 'sometimes|required|string|max:100',
-            'aval.relacionAval'            => 'sometimes|required|string|max:50',
+            'aval.relacionClienteAval'            => 'sometimes|required|string|max:50',
         ]);
     }
 }
