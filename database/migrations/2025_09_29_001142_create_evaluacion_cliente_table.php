@@ -17,14 +17,13 @@ return new class extends Migration
             $table->unsignedBigInteger('id_Cliente');
             $table->string('producto');
             $table->decimal('monto_prestamo', 10, 2);
-            $table->int('tasa_interes');
-            $table->int('cuotas');
+            $table->integer('tasa_interes');
+            $table->integer('cuotas');
             $table->string('modalidad_credito');
             $table->string('destino_credito');
             $table->string('periodo_credito');
             $table->tinyInteger('estado')->default(0)->comment('0: Pendiente , 1: Aceptado , 2: Rechazado');
             $table->string('observaciones')->nullable();
-            $table->string('')->nullable();
             $table->timestamps();
 
 

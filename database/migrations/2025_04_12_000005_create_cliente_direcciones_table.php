@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('direcciones', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('id_Datos');
-            $table->enum('tipo', ['FISCAL', 'CORRESPONDENCIA'])->nullable();
-            $table->string('direccion');
+            $table->string('direccionFiscal');
+            $table->string('direccionCorrespondencia');
             $table->string('departamento');
             $table->string('provincia');
             $table->string('distrito');

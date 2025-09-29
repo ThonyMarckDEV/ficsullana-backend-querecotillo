@@ -12,18 +12,18 @@ class UsuarioSeeder extends Seeder
     {
         // 1. Insertamos el registro en tabla datos
         $idDato = DB::table('datos')->insertGetId([
-            'nombre' => 'Anthony',
-            'apellidoPaterno' => 'Mendoza',
-            'apellidoMaterno' => 'Sanchez',
+            'nombre' => 'Carlos',
+            'apellidoPaterno' => 'Guevara',
+            'apellidoMaterno' => 'Sosa',
             'apellidoConyuge' => null,
             'estadoCivil' => 'Soltero',
             'sexo' => 'Masculino',
-            'dni' => '61883939',
+            'dni' => '67856473',
             'fechaCaducidadDni' => '2029-09-14',
             'nacionalidad' => 'Peruana',
             'residePeru' => 1,
             'nivelEducativo' => 'Superior',
-            'profesion' => 'Ingeniero Software',
+            'profesion' => 'Ing. Sofware',
             'enfermedadesPreexistentes' => 0,
             'ruc' => null,
             'expuesta' => 0,
@@ -33,7 +33,7 @@ class UsuarioSeeder extends Seeder
 
         // 2. Insertamos el usuario con idDato relacionado
         DB::table('usuarios')->insert([
-            'username' => 'thonymarck',
+            'username' => 'carlosguevara',
             'password' => Hash::make('123456'),
             'id_Datos' => $idDato,
             'id_Rol' => 4, // Rol asesor
