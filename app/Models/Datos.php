@@ -20,14 +20,19 @@ class Datos extends Model
         'sexo',
         'dni',
         'fechaCaducidadDni',
+        'nacionalidad',
+        'residePeru',
+        'nivelEducativo',
+        'profesion',
+        'enfermedadesPreexistentes',
         'ruc',
         'expuesta',
-        'aval'
     ];
 
     protected $casts = [
         'expuesta' => 'boolean',
-        'aval' => 'boolean'
+        'enfermedadesPreexistentes' => 'boolean',
+        'residePeru' => 'boolean',
     ];
 
     public function usuario()

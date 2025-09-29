@@ -13,7 +13,7 @@ return new class extends Migration {
             $table->string('password')->nullable();
             $table->unsignedBigInteger('id_Datos')->nullable();
             $table->unsignedBigInteger('id_Rol')->default(2); // Por defecto 2 que es cliente
-            $table->boolean('estado')->default(1)->comment('1: Activo, 0: Inactivo');
+            $table->tinyInteger('estado')->default(1)->comment('0: Inactivo , 1: Activo, ');
             $table->timestamps();
             
             // Foreign keys

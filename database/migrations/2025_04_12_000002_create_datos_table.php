@@ -18,9 +18,13 @@ return new class extends Migration
             $table->string('sexo')->comment('M: Masculino, F: Femenino');
             $table->string('dni', 9)->unique();
             $table->date('fechaCaducidadDni');
+            $table->string('nacionalidad');
+            $table->boolean('residePeru');
+            $table->string('nivelEducativo');
+            $table->string('profesion');
+            $table->boolean('enfermedadesPreexistentes');
             $table->string('ruc', 11)->nullable()->unique();
             $table->boolean('expuesta')->default(false);
-            $table->boolean('aval')->default(false);
             $table->timestamps();
         });
     }
