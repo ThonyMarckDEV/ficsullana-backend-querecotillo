@@ -31,6 +31,7 @@ Route::middleware(['auth.jwt', 'checkRoleMW:asesor'])->group(function () {
 
 
     Route::post('/evaluaciones/create', [EvaluacionCliente::class, 'store']);
+    Route::get('/evaluaciones/index', [EvaluacionCliente::class, 'index']);
 
 });
 

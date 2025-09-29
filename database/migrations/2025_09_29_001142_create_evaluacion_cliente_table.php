@@ -14,6 +14,7 @@ return new class extends Migration
     {
         Schema::create('evaluacion_cliente', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('id_Asesor');
             $table->unsignedBigInteger('id_Cliente');
             $table->string('producto');
             $table->decimal('monto_prestamo', 10, 2);
@@ -27,6 +28,7 @@ return new class extends Migration
             $table->timestamps();
 
 
+            $table->foreign('id_Asesor')->references('id')->on('usuarios')->onDelete('cascade');
             $table->foreign('id_Cliente')->references('id')->on('usuarios')->onDelete('cascade');
         });
     }

@@ -23,6 +23,7 @@ class EvaluacionCliente extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'id_Asesor',
         'id_Cliente',
         'producto',
         'monto_prestamo',

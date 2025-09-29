@@ -4,8 +4,10 @@ namespace App\Http\Controllers\EvaluacionCliente;
 
 use App\Http\Controllers\EvaluacionCliente\services\ProcesarEvaluacion;
 use App\Http\Controllers\EvaluacionCliente\utilities\EvaluacionClienteUtils;
+use App\Models\EvaluacionCliente as EvaluacionClienteModel;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class EvaluacionCliente extends Controller
@@ -40,5 +42,29 @@ class EvaluacionCliente extends Controller
             ], 500); // 500 Internal Server Error
         }
     }
+
+    /**
+     * Muestra un listado de las evaluaciones asignadas al asesor autenticado.
+     */
+    public function index()
+    {
+        try {
+            // Obtenemos el ID del usuario (asesor) logeado
+            $idAsesorLogeado = Auth::user()->id;
+
+            $evaluaciones = EvaluacionClienteModel::with('cliente.datos')
+                // <-- 2. Filtra donde 'id_Asesor' coincida con el del usuario logeado
+                ->where('id_Asesor', $idAsesorLogeado) 
+                ->latest() // Ordena por las más recientes primero
+                ->get();
+
+            return response()->json($evaluaciones);
+
+        } catch (\Exception $e) {
+            Log::error('Error al obtener evaluaciones: ' . $e->getMessage());
+            return response()->json(['msg' => 'Error al obtener los datos'], 500);
+        }
+    }
+
 
 }

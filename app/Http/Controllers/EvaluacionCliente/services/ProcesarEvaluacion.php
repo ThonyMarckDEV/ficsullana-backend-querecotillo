@@ -10,6 +10,7 @@ use App\Models\CuentaBancaria;
 use App\Models\Datos;
 use App\Models\Direccion;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -121,8 +122,9 @@ class ProcesarEvaluacion
                 }
 
                 
-                // 8. Subir la Evaluacion de Cliente (¡LA PARTE NUEVA!)
+                // 8. Subir la Evaluacion de Cliente
                 EvaluacionCliente::create([
+                    'id_Asesor'=> Auth::user()->id, //ID DEL ASESOR
                     'id_Cliente'        => $usuario->id,
                     'producto'          => $creditoData['producto'],
                     'monto_prestamo'    => $creditoData['montoPrestamo'],
