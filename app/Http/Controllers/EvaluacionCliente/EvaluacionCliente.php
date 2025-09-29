@@ -23,6 +23,8 @@ class EvaluacionCliente extends Controller
             ], 422);
         }
 
+        
+
         // Accedemos a cada bloque
         $usuario   = $data['usuario'] ?? [];
         $credito   = $data['credito'] ?? [];
