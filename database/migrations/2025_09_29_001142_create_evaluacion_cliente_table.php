@@ -17,12 +17,12 @@ return new class extends Migration
             $table->unsignedBigInteger('id_Asesor');
             $table->unsignedBigInteger('id_Cliente');
             $table->string('producto');
-            $table->decimal('monto_prestamo', 10, 2);
-            $table->integer('tasa_interes');
+            $table->decimal('montoPrestamo', 10, 2);
+            $table->integer('tasaInteres');
             $table->integer('cuotas');
-            $table->string('modalidad_credito');
-            $table->string('destino_credito');
-            $table->string('periodo_credito');
+            $table->string('modalidadCredito');
+            $table->string('destinoCredito');
+            $table->string('periodoCredito');
             $table->tinyInteger('estado')->default(0)->comment('0: Pendiente , 1: Aceptado , 2: Rechazado');
             $table->string('observaciones')->nullable();
             $table->timestamps();

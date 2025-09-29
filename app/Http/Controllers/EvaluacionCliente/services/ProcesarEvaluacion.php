@@ -46,13 +46,14 @@ class ProcesarEvaluacion
                     'sexo' => $usuarioData['sexo'],
                     'dni' => $usuarioData['dni'],
                     'fechaCaducidadDni' => $usuarioData['fechaCaducidadDni'],
+                    'fechaNacimiento'=> $usuarioData['fechaNacimiento'],
                     'nacionalidad' => $usuarioData['nacionalidad'],
                     'residePeru' => $usuarioData['residePeru'],
                     'nivelEducativo' => $usuarioData['nivelEducativo'],
                     'profesion' => $usuarioData['profesion'],
                     'enfermedadesPreexistentes' => $usuarioData['enfermedadesPreexistentes'],
                     'ruc' => $usuarioData['ruc'] ?? null,
-                    'expuesta' => $usuarioData['expuesta'] ?? false,
+                    'expuestaPoliticamente' => $usuarioData['expuestaPoliticamente'] ?? false,
                 ]);
 
                 // 2. Crear el 'usuario' con la contraseña igual al DNI (hasheada)
@@ -127,12 +128,12 @@ class ProcesarEvaluacion
                     'id_Asesor'=> Auth::user()->id, //ID DEL ASESOR
                     'id_Cliente'        => $usuario->id,
                     'producto'          => $creditoData['producto'],
-                    'monto_prestamo'    => $creditoData['montoPrestamo'],
-                    'tasa_interes'      => $creditoData['tasaInteres'],
+                    'montoPrestamo'    => $creditoData['montoPrestamo'],
+                    'tasaInteres'      => $creditoData['tasaInteres'],
                     'cuotas'            => $creditoData['cuotas'],
-                    'modalidad_credito' => $creditoData['modalidad'],
-                    'destino_credito'   => $creditoData['destinoCredito'],
-                    'periodo_credito'   => $creditoData['periodoCredito'],
+                    'modalidadCredito' => $creditoData['modalidadCredito'],
+                    'destinoCredito'   => $creditoData['destinoCredito'],
+                    'periodoCredito'   => $creditoData['periodoCredito'],
                     // El estado y observaciones tienen valores por defecto o son nulos
                 ]);
 

@@ -19,6 +19,7 @@ class UsuarioSeeder extends Seeder
             'estadoCivil' => 'Soltero',
             'sexo' => 'Masculino',
             'dni' => '67856473',
+            'fechaNacimiento'=> '2003-11-08',
             'fechaCaducidadDni' => '2029-09-14',
             'nacionalidad' => 'Peruana',
             'residePeru' => 1,

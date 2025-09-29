@@ -25,7 +25,7 @@ return new class extends Migration
             $table->string('profesion');
             $table->boolean('enfermedadesPreexistentes');
             $table->string('ruc', 11)->nullable()->unique();
-            $table->boolean('expuesta')->default(false);
+            $table->boolean('expuestaPoliticamente');
             $table->timestamps();
         });
     }

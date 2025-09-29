@@ -89,7 +89,7 @@ class EvaluacionCliente extends Controller
                 'contactos', 
                 'direcciones', 
                 'empleos', 
-                'cuentasBancarias' // Asegúrate que la relación se llame así en el modelo Datos
+                'cuentasBancarias'
             ])->where('dni', $dni)->firstOrFail();
 
             // Buscamos la última evaluación rechazada para ese cliente
@@ -98,9 +98,9 @@ class EvaluacionCliente extends Controller
             })->where('estado', 2)->latest()->first();
 
             return response()->json([
-                'usuario' => $datos,
+                'datosCliente' => $datos,
                 'evaluacion' => $evaluacion,
-                'aval' => $datos->usuario->avales->first() ?? null // Devuelve el primer aval si existe
+                'aval' => $datos->usuario?->avales->first() ?? null
             ]);
 
         } catch (Throwable $e) {
@@ -148,12 +148,12 @@ class EvaluacionCliente extends Controller
             $evaluacion = EvaluacionClienteModel::findOrFail($evaluacionId);
             $evaluacion->update([
                 'producto' => $creditoData['producto'],
-                'monto_prestamo' => $creditoData['montoPrestamo'],
-                'tasa_interes' => $creditoData['tasaInteres'],
+                'montoPrestamo' => $creditoData['montoPrestamo'],
+                'tasaInteres' => $creditoData['tasaInteres'],
                 'cuotas' => $creditoData['cuotas'],
-                'modalidad_credito' => $creditoData['modalidad'],
-                'destino_credito' => $creditoData['destinoCredito'],
-                'periodo_credito' => $creditoData['periodoCredito'],
+                'modalidadCredito' => $creditoData['modalidadCredito'],
+                'destinoCredito' => $creditoData['destinoCredito'],
+                'periodoCredito' => $creditoData['periodoCredito'],
                 'estado' => 0, // Vuelve a PENDIENTE
                 'observaciones' => null, // Limpia las observaciones de rechazo
             ]);

@@ -45,13 +45,14 @@ class EvaluacionClienteUtils
             'usuario.provincia'             => 'required|string|max:100',
             'usuario.departamento'          => 'required|string|max:100',
             'usuario.distrito'              => 'required|string|max:100',
+            'usuario.expuestaPoliticamente'=> 'nullable|string|max:255',
 
             // CAMPOS CRÉDITO
             'credito.producto'              => 'required|string|max:100',
             'credito.montoPrestamo'         => 'required|numeric|min:100',
             'credito.tasaInteres'           => 'required|numeric|min:0|max:100',
             'credito.cuotas'                => 'required|integer|min:1',
-            'credito.modalidad'             => 'required|string|max:50',
+            'credito.modalidadCredito'      => 'required|string|max:50',
             'credito.destinoCredito'        => 'required|string|max:150',
             'credito.periodoCredito'        => 'required|string|max:50',
             

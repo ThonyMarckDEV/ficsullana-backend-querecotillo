@@ -23,17 +23,11 @@ class Datos extends Model
         'fechaNacimiento',
         'nacionalidad',
         'residePeru',
+        'expuestaPoliticamente',
         'nivelEducativo',
         'profesion',
         'enfermedadesPreexistentes',
         'ruc',
-        'expuesta',
-    ];
-
-    protected $casts = [
-        'expuesta' => 'boolean',
-        'enfermedadesPreexistentes' => 'boolean',
-        'residePeru' => 'boolean',
     ];
 
     public function usuario()
