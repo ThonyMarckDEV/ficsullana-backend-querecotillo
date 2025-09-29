@@ -15,9 +15,9 @@ class Contacto extends Model
     protected $fillable = [
         'id_Datos',
         'tipo',
-        'telefono',
-        'telefonoDos',
-        'email'
+        'telefonoMovil',
+        'telefonoFijo',
+        'correo'
     ];
 
     public function datos()

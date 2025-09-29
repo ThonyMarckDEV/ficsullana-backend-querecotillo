@@ -19,7 +19,7 @@ class EvaluacionClienteUtils
             'usuario.dni'                   => 'required|digits_between:8,9',
             'usuario.apellidoPaterno'       => 'required|string|max:100',
             'usuario.apellidoMaterno'       => 'nullable|string|max:100',
-            'usuario.nombres'               => 'required|string|max:100',
+            'usuario.nombre'               => 'required|string|max:100',
             'usuario.fechaNacimiento'       => 'required|date',
             'usuario.sexo'                  => 'required|string|max:50',
             'usuario.estadoCivil'           => 'required|string|max:50',

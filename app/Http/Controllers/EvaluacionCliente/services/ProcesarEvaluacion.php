@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\EvaluacionCliente\services;
 
+use App\Models\EvaluacionCliente;
 use App\Models\ClienteAval;
 use App\Models\ClienteEmpleo;
 use App\Models\Contacto;
@@ -35,7 +36,7 @@ class ProcesarEvaluacion
             $resultado = DB::transaction(function () use ($usuarioData, $avalData) {
                 
                 // 1. Crear el registro en la tabla 'datos'
-                $dato = Datos::create([
+                $datos = Datos::create([
                     'nombre' => $usuarioData['nombre'],
                     'apellidoPaterno' => $usuarioData['apellidoPaterno'],
                     'apellidoMaterno' => $usuarioData['apellidoMaterno'],
@@ -57,13 +58,13 @@ class ProcesarEvaluacion
                 $usuario = User::create([
                     'username' => $usuarioData['dni'],
                     'password' => Hash::make($usuarioData['dni']),
-                    'id_Datos' => $dato->id,
+                    'id_Datos' => $datos->id,
                     // id_Rol y estado tienen valores por defecto en la migración
                 ]);
 
                 // 3. Crear la 'direccion'
                 Direccion::create([
-                    'id_Datos' => $dato->id,
+                    'id_Datos' => $datos->id,
                     'direccionFiscal' => $usuarioData['direccionFiscal'],
                     'direccionCorrespondencia' => $usuarioData['direccionCorrespondencia'],
                     'departamento' => $usuarioData['departamento'],
@@ -71,32 +72,32 @@ class ProcesarEvaluacion
                     'distrito' => $usuarioData['distrito'],
                     'tipoVivienda' => $usuarioData['tipoVivienda'],
                     'tiempoResidencia' => $usuarioData['tiempoResidencia'],
-                    'ReferenciaDomicilio' => $usuarioData['ReferenciaDomicilio'],
+                    'referenciaDomicilio' => $usuarioData['referenciaDomicilio'],
                 ]);
 
                 // 4. Crear el 'contacto'
                 Contacto::create([
-                    'id_Datos' => $dato->id,
+                    'id_Datos' => $datos->id,
                     'tipo' => 'PRINCIPAL', // O según venga en el JSON
-                    'telefono' => $usuarioData['telefono'],
-                    'telefonoDos' => $usuarioData['telefonoDos'] ?? null,
-                    'email' => $usuarioData['email'] ?? null,
+                    'telefonoMovil' => $usuarioData['telefonoMovil'],
+                    'telefonoFijo' => $usuarioData['telefonoFijo'] ?? null,
+                    'correo' => $usuarioData['correo'] ?? null,
                 ]);
                 
                 // 5. Crear la 'cuenta_bancaria'
                 CuentaBancaria::create([
-                    'id_Datos' => $dato->id,
-                    'numeroCuenta' => $usuarioData['numeroCuenta'],
+                    'id_Datos' => $datos->id,
+                    'ctaAhorros' => $usuarioData['ctaAhorros'],
                     'cci' => $usuarioData['cci'] ?? null,
                     'entidadFinanciera' => $usuarioData['entidadFinanciera'],
                 ]);
 
                 // 6. Crear el 'empleo'
                 ClienteEmpleo::create([
-                    'id_Datos' => $dato->id,
+                    'id_Datos' => $datos->id,
                     'centroLaboral' => $usuarioData['centroLaboral'],
                     'ingresoMensual' => $usuarioData['ingresoMensual'],
-                    'fechaInicio' => $usuarioData['fechaInicio'],
+                    'inicioLaboral' => $usuarioData['inicioLaboral'],
                     'situacionLaboral' => $usuarioData['situacionLaboral'],
                 ]);
 
@@ -118,6 +119,20 @@ class ProcesarEvaluacion
                         'relacionClienteAval' => $avalData['relacionClienteAval'],
                     ]);
                 }
+
+                
+                // 8. Subir la Evaluacion de Cliente (¡LA PARTE NUEVA!)
+                EvaluacionCliente::create([
+                    'id_Cliente'        => $usuario->id,
+                    'producto'          => $usuarioData['producto'],
+                    'monto_prestamo'    => $usuarioData['montoPrestamo'],
+                    'tasa_interes'      => $usuarioData['tasaInteres'],
+                    'cuotas'            => $usuarioData['cuotas'],
+                    'modalidad_credito' => $usuarioData['modalidad'],
+                    'destino_credito'   => $usuarioData['destinoCredito'],
+                    'periodo_credito'   => $usuarioData['periodoCredito'],
+                    // El estado y observaciones tienen valores por defecto o son nulos
+                ]);
 
                 // Si todo fue exitoso, retornamos el ID del nuevo usuario
                 return $usuario->id;

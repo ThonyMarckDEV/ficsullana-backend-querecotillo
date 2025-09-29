@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('id_Datos');
             $table->enum('tipo', ['PRINCIPAL', 'SECUNDARIO'])->comment('Tipo de contacto: PRINCIPAL o SECUNDARIO');
-            $table->string('telefono')->unique();
-            $table->string('telefonoDos')->nullable()->unique();
-            $table->string('email')->nullable()->unique();
+            $table->string('telefonoMovil')->unique();
+            $table->string('telefonoFijo')->nullable()->unique();
+            $table->string('correo')->nullable()->unique();
             $table->timestamps();
         
             $table->foreign('id_Datos')->references('id')->on('datos')->onDelete('cascade');

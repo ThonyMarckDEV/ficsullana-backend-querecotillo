@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('id_Datos');
             $table->string('centroLaboral');
             $table->integer('ingresoMensual');
-            $table->date('fechaInicio');
+            $table->date('inicioLaboral');
             $table->string('situacionLaboral');
             $table->timestamps();
 

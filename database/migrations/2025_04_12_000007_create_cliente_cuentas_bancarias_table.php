@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('cuentas_bancarias', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('id_Datos');
-            $table->string('numeroCuenta')->unique();
+            $table->string('ctaAhorros')->unique();
             $table->string('cci')->nullable()->unique();
             $table->string('entidadFinanciera');
             $table->timestamps();

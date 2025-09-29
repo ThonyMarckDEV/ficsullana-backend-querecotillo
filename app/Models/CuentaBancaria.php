@@ -24,7 +24,7 @@ class CuentaBancaria extends Model
      */
     protected $fillable = [
         'id_Datos',
-        'numeroCuenta',
+        'ctaAhorros',
         'cci',
         'entidadFinanciera',
     ];

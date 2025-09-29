@@ -24,14 +24,14 @@ class Direccion extends Model
      */
     protected $fillable = [
         'id_Datos',
-        'tipo',
-        'direccion',
+        'direccionFiscal',
+        'direccionCorrespondencia',
         'departamento',
         'provincia',
         'distrito',
         'tipoVivienda',
         'tiempoResidencia',
-        'ReferenciaDomicilio',
+        'referenciaDomicilio',
     ];
 
     /**

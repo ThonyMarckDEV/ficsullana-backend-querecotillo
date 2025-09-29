@@ -26,7 +26,7 @@ class ClienteEmpleo extends Model
         'id_Datos',
         'centroLaboral',
         'ingresoMensual',
-        'fechaInicio',
+        'inicioLaboral',
         'situacionLaboral',
     ];
 
