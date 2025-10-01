@@ -5,7 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 
-class CheckRolesMW
+class CheckRolesMW_JEFE_NEGOCIOS_ASESOR
 {
     /**
      * Handle an incoming request.
@@ -19,7 +19,7 @@ class CheckRolesMW
     {
         // Si no se pasan roles como parámetros, permitimos los roles cliente y manager por defecto
         if (empty($roles)) {
-            $roles = ['cliente', 'admin' ,'asesor' , 'auditor' , 'superadmin', 'cajero' , 'jefe_negocios'];
+            $roles = ['jefe_negocios' ,'asesor'];
         }
 
         // Verificar que el usuario está autenticado y el payload está disponible

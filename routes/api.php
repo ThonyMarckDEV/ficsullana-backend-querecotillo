@@ -3,7 +3,8 @@
 use App\Http\Controllers\Auth\AuthController;
 
 use App\Http\Controllers\Auth\ResetPassword\PasswordResetController;
-use App\Http\Controllers\EvaluacionCliente\EvaluacionCliente;
+use App\Http\Controllers\ClienteController\ClienteController;
+use App\Http\Controllers\EvaluacionCliente\EvaluacionClienteController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login']);
@@ -29,20 +30,20 @@ Route::middleware(['auth.jwt', 'checkRoleMW:cliente'])->group(function () {
 // RUTAS PARA cliente VALIDADA POR MIDDLEWARE AUTH (PARA TOKEN JWT) Y CHECKROLE (PARA VALIDAR ROL DEL TOKEN)
 Route::middleware(['auth.jwt', 'checkRoleMW:asesor'])->group(function () { 
 
-
-    Route::post('/evaluaciones/create', [EvaluacionCliente::class, 'store']);
-    Route::get('/evaluaciones/index', [EvaluacionCliente::class, 'index']);
-    Route::get('/evaluaciones/cliente/{dni}', [EvaluacionCliente::class, 'show']);
-    Route::put('/evaluaciones/update/{evaluacionId}', [EvaluacionCliente::class, 'update']);
+    Route::post('/evaluaciones/create', [EvaluacionClienteController::class, 'store']);
+    Route::put('/evaluaciones/update/{evaluacionId}', [EvaluacionClienteController::class, 'update']);
 
 });
 
 
 
 // RUTAS PARA ROL ADMIN Y ASESOR
-Route::middleware(['auth.jwt', 'CheckRolesMW_ADMIN_ASESOR'])->group(function () { 
+Route::middleware(['auth.jwt', 'CheckRolesMW_JEFE_NEGOCIOS_ASESOR'])->group(function () { 
 
-
+    Route::get('/evaluaciones/index', [EvaluacionClienteController::class, 'index']);
+    Route::get('/cliente/{dni}', [ClienteController::class, 'show']);
+    Route::put('/evaluaciones/status/{evaluacionId}', [EvaluacionClienteController::class, 'updateStatus']);
+    
 });
 
 // RUTAS PARA ROL ADMIN Y AUDITOR
@@ -63,3 +64,4 @@ Route::middleware(['auth.jwt', 'checkRolesMW'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
 });
+

@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
-class EvaluacionCliente extends Controller
+class EvaluacionClienteController extends Controller
 {
     public function store(Request $request)
     {
@@ -49,6 +49,7 @@ class EvaluacionCliente extends Controller
 
     /**
      * Busca evaluaciones por DNI de cliente, asignadas al asesor autenticado.
+     * Si el usuario es jefe_negocios, obtiene todas las evaluaciones del cliente sin filtrar por asesor.
      */
     public function index(Request $request) // <-- Acepta el Request
     {
@@ -58,17 +59,29 @@ class EvaluacionCliente extends Controller
 
         try {
             $dni = $request->input('dni');
-            $idAsesorLogeado = Auth::id();
+            $user = Auth::user();
+            $idAsesorLogeado = $user->id;
+            $isJefeNegocios = $user->id_Rol == 7;
+            $isAsesor = $user->id_Rol == 4;
 
-            // Usamos 'whereHas' para buscar dentro de las relaciones
-            $evaluaciones = EvaluacionClienteModel::with('cliente.datos')
-                ->where('id_Asesor', $idAsesorLogeado)
-                ->whereHas('cliente.datos', function ($query) use ($dni) {
-                    // Aquí filtramos por el DNI en la tabla 'datos'
-                    $query->where('dni', $dni);
+            // Verificar rol requerido
+            if (!$isAsesor && !$isJefeNegocios) {
+                return response()->json(['msg' => 'Acceso denegado. Se requiere rol: asesor o jefe de negocios'], 403);
+            }
+
+            // Query base
+            $query = EvaluacionClienteModel::with('cliente.datos')
+                ->whereHas('cliente.datos', function ($q) use ($dni) {
+                    $q->where('dni', $dni);
                 })
-                ->latest()
-                ->get();
+                ->latest();
+
+            // Si no es jefe_negocios, filtra por id_Asesor (solo aplica para asesores)
+            if (!$isJefeNegocios) {
+                $query->where('id_Asesor', $idAsesorLogeado);
+            }
+
+            $evaluaciones = $query->get();
 
             return response()->json($evaluaciones);
 
@@ -78,38 +91,7 @@ class EvaluacionCliente extends Controller
         }
     }
 
-     /**
-     * Obtiene todos los datos asociados a un cliente por su DNI para la corrección.
-     */
-    public function show($dni)
-    {
-        try {
-             // Esta consulta ahora podrá seguir la cadena de relaciones sin problemas
-            $datos = Datos::with([
-                'usuario.avales', // Carga el usuario y, a través de él, sus avales
-                'contactos', 
-                'direcciones', 
-                'empleos', 
-                'cuentasBancarias'
-            ])->where('dni', $dni)->firstOrFail();
-
-            // Buscamos la última evaluación rechazada para ese cliente
-            $evaluacion = EvaluacionClienteModel::whereHas('cliente.datos', function ($query) use ($dni) {
-                $query->where('dni', $dni);
-            })->where('estado', 2)->latest()->first();
-
-            return response()->json([
-                'datosCliente' => $datos,
-                'evaluacion' => $evaluacion,
-                'aval' => $datos->usuario?->avales->first() ?? null
-            ]);
-
-        } catch (Throwable $e) {
-            Log::error('Error al obtener datos para corrección: ' . $e->getMessage());
-            return response()->json(['msg' => 'No se encontraron datos para el DNI proporcionado.'], 404);
-        }
-    }
-
+    
     /**
      * Actualiza una evaluación y los datos del cliente.
      */
@@ -169,5 +151,45 @@ class EvaluacionCliente extends Controller
         }
     }
 
+    /**
+     * Actualiza el estado de una evaluación (solo para jefe_negocios: aprobar o rechazar).
+     */
+    public function updateStatus(Request $request, $evaluacionId)
+    {
+        $request->validate([
+            'estado' => 'required|in:1,2',
+            'observaciones' => 'nullable|string|required_if:estado,2|max:500'
+        ]);
 
+        try {
+            $user = Auth::user();
+            if ($user->id_Rol != 7) {
+                return response()->json(['msg' => 'Acceso denegado. Solo jefe de negocios puede actualizar estados.'], 403);
+            }
+
+            $evaluacion = EvaluacionClienteModel::findOrFail($evaluacionId);
+
+            if ($evaluacion->estado != 0) {
+                return response()->json(['msg' => 'Solo las evaluaciones pendientes pueden ser aprobadas o rechazadas.'], 400);
+            }
+
+            $updateData = [
+                'estado' => $request->estado,
+            ];
+
+            if ($request->estado == 2) {
+                $updateData['observaciones'] = $request->observaciones;
+            } else {
+                $updateData['observaciones'] = null;
+            }
+
+            $evaluacion->update($updateData);
+
+            return response()->json(['msg' => 'Estado de la evaluación actualizado exitosamente.']);
+
+        } catch (\Exception $e) {
+            Log::error('Error al actualizar estado de evaluación: ' . $e->getMessage());
+            return response()->json(['msg' => 'Error al actualizar el estado.'], 500);
+        }
+    }
 }
