@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\EvaluacionCliente;
 
 use App\Http\Controllers\EvaluacionCliente\services\ProcesarEvaluacion;
-use App\Http\Controllers\EvaluacionCliente\utilities\EvaluacionClienteUtils;
+use App\Http\Controllers\EvaluacionCliente\utilities\EvaluacionClienteValidations;
 use App\Models\Datos;
 use App\Models\EvaluacionCliente as EvaluacionClienteModel;
 use Illuminate\Http\Request;
@@ -12,6 +12,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class EvaluacionCliente extends Controller
 {
@@ -20,7 +21,7 @@ class EvaluacionCliente extends Controller
         // Obtnemos data y Decodificamos el JSON recibido 
         $data = json_decode($request->input('data'), true);
 
-        $validator = EvaluacionClienteUtils::StoreValidate($data);
+        $validator = EvaluacionClienteValidations::StoreValidate($data);
 
         if ($validator->fails()) {
             return response()->json([

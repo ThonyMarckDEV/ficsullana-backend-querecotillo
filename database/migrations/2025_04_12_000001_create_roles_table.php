@@ -25,6 +25,7 @@ return new class extends Migration
             ['nombre' => 'asesor', 'descripcion' => 'Asesor del sistema', 'estado' => true, 'created_at' => now(), 'updated_at' => now()],
             ['nombre' => 'auditor', 'descripcion' => 'Auditor del sistema', 'estado' => true, 'created_at' => now(), 'updated_at' => now()],
             ['nombre' => 'cajero', 'descripcion' => 'Cajero del sistema', 'estado' => true, 'created_at' => now(), 'updated_at' => now()],
+            ['nombre' => 'jefe_negocios', 'descripcion' => 'Jefe de Negocios', 'estado' => true, 'created_at' => now(), 'updated_at' => now()],
         ]);
     }
 

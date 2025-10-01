@@ -4,7 +4,7 @@ namespace App\Http\Controllers\EvaluacionCliente\utilities;
 
 use Illuminate\Support\Facades\Validator;
 
-class EvaluacionClienteUtils
+class EvaluacionClienteValidations
 {
     /**
      * Valida los datos de la solicitud de préstamo
