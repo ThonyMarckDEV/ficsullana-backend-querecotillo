@@ -35,6 +35,12 @@ Route::middleware(['auth.jwt', 'checkRoleMW:asesor'])->group(function () {
 
 });
 
+// RUTAS PARA cliente VALIDADA POR MIDDLEWARE AUTH (PARA TOKEN JWT) Y CHECKROLE (PARA VALIDAR ROL DEL TOKEN)
+Route::middleware(['auth.jwt', 'checkRoleMW:jefe_negocios'])->group(function () { 
+
+    Route::put('/evaluaciones/correct/{evaluacion}', [EvaluacionClienteController::class, 'correctEvaluation']);
+
+});
 
 
 // RUTAS PARA ROL ADMIN Y ASESOR

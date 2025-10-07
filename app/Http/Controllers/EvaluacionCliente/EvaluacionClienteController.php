@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\EvaluacionCliente;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\EvaluacionClienteRequest\CorrectEvaluacionRequest;
+use App\Models\EvaluacionCliente;
 use Illuminate\Http\JsonResponse;
 
 // Actions
@@ -61,6 +63,28 @@ class EvaluacionClienteController extends Controller
         }
         
         return response()->json(['msg' => $resultado['message']], 500);
+    }
+
+     /**
+     * Corrige los datos de una evaluación crediticia específica.
+     *
+     * @param CorrectEvaluacionRequest $request
+     * @param EvaluacionCliente $evaluacion El ID de la evaluación se inyecta automáticamente.
+     * @return JsonResponse
+     */
+    public function correctEvaluation(CorrectEvaluacionRequest $request, EvaluacionCliente $evaluacion): JsonResponse
+    {
+        // 1. Los datos ya vienen validados por CorrectEvaluacionRequest.
+        $validatedData = $request->validated();
+
+        // 2. Actualiza la evaluación con los datos validados.
+        $evaluacion->update($validatedData);
+
+        // 3. Devuelve una respuesta exitosa.
+        return response()->json([
+            'message' => 'Evaluación corregida exitosamente.',
+            'evaluacion' => $evaluacion // Opcional: devuelve los datos actualizados.
+        ], 200);
     }
     
     /**
