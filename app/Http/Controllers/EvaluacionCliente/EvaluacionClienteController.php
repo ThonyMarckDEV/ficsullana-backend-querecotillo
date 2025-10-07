@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\EvaluacionCliente;
 
 use App\Http\Controllers\EvaluacionCliente\services\ProcesarEvaluacion;
-use App\Http\Controllers\EvaluacionCliente\utilities\EvaluacionClienteValidations;
+use App\Http\Requests\StoreEvaluacionClienteRequest;
 use App\Models\Datos;
 use App\Models\EvaluacionCliente as EvaluacionClienteModel;
 use Illuminate\Http\Request;
@@ -16,35 +16,34 @@ use Throwable;
 
 class EvaluacionClienteController extends Controller
 {
-    public function store(Request $request)
+      /**
+     * Almacena una nueva evaluación de cliente.
+     *
+     * @param  StoreEvaluacionClienteRequest  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function store(StoreEvaluacionClienteRequest $request)
     {
-        // Obtnemos data y Decodificamos el JSON recibido 
-        $data = json_decode($request->input('data'), true);
+        // 1. OBTENER DATOS VALIDADOS
+        $validatedData = $request->validated();
 
-        $validator = EvaluacionClienteValidations::StoreValidate($data);
+        // 2. LLAMAR AL SERVICIO PARA PROCESAR
+        // Pasamos directamente los datos ya validados.
+        $resultado = ProcesarEvaluacion::execute($validatedData);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'msg'    => 'Errores de validación',
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        // 2. Llamamos al servicio para procesar y guardar los datos
-        $resultado = ProcesarEvaluacion::execute($data);
-
-        // 3. Devolvemos una respuesta basada en el resultado del servicio
+        // 3. DEVOLVER RESPUESTA
         if ($resultado['success']) {
             return response()->json([
                 'msg'        => $resultado['message'],
                 'usuario_id' => $resultado['usuario_id']
-            ], 201); // 201 Created es un buen código de estado para una creación exitosa
-        } else {
-            return response()->json([
-                'msg'    => $resultado['message'],
-                'errors' => 'Error en el servidor al procesar la solicitud.'
-            ], 500); // 500 Internal Server Error
+            ], 201); // 201 Created
         }
+
+        // Si el servicio falla por alguna razón.
+        return response()->json([
+            'msg'    => $resultado['message'],
+            'errors' => $resultado['errors'] ?? 'Error interno del servidor.'
+        ], 500); // 500 Internal Server Error
     }
 
     /**
