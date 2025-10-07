@@ -43,4 +43,13 @@ class EvaluacionCliente extends Model
     {
         return $this->belongsTo(User::class, 'id_Cliente' , 'id');
     }
+
+    /**
+     * Obtiene el usuario (cliente) asociado a esta evaluación.
+     */
+    public function asesor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'id_Asesor' , 'id');
+    }
+
 }
