@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Actions\EvaluacionCliente;
+namespace App\Http\Controllers\EvaluacionCliente\utilities;
 
+use App\Http\Controllers\EvaluacionCliente\services\AvalService;
+use App\Http\Controllers\EvaluacionCliente\services\ClienteDataService;
 use App\Models\EvaluacionCliente;
-use App\Services\EvaluacionCliente\AvalService;
-use App\Services\EvaluacionCliente\ClienteDataService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Throwable;

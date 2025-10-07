@@ -2,193 +2,81 @@
 
 namespace App\Http\Controllers\EvaluacionCliente;
 
-use App\Http\Controllers\EvaluacionCliente\services\ProcesarEvaluacion;
-use App\Http\Requests\StoreEvaluacionClienteRequest;
-use App\Models\Datos;
-use App\Models\EvaluacionCliente as EvaluacionClienteModel;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Throwable;
+use Illuminate\Http\JsonResponse;
+
+// Actions
+use App\Http\Controllers\EvaluacionCliente\utilities\StoreEvaluacionAction;
+use App\Http\Controllers\EvaluacionCliente\utilities\UpdateEvaluacionAction;
+use App\Http\Controllers\EvaluacionCliente\utilities\UpdateEvaluacionStatusAction;
+
+// Services
+use App\Http\Controllers\EvaluacionCliente\services\BuscarEvaluacionService;
+
+// Form Requests
+use App\Http\Requests\EvaluacionClienteRequest\IndexEvaluacionClienteRequest;
+use App\Http\Requests\EvaluacionClienteRequest\StoreEvaluacionClienteRequest;
+use App\Http\Requests\EvaluacionClienteRequest\UpdateEvaluacionClienteRequest;
+use App\Http\Requests\EvaluacionClienteRequest\UpdateEvaluacionStatusRequest;
 
 class EvaluacionClienteController extends Controller
 {
-      /**
-     * Almacena una nueva evaluación de cliente.
-     *
-     * @param  StoreEvaluacionClienteRequest  $request
-     * @return \Illuminate\Http\JsonResponse
+    /**
+     * Busca evaluaciones por DNI de cliente.
      */
-    public function store(StoreEvaluacionClienteRequest $request)
+    public function index(IndexEvaluacionClienteRequest $request, BuscarEvaluacionService $finder): JsonResponse
     {
-        // 1. OBTENER DATOS VALIDADOS
-        $validatedData = $request->validated();
+        // La autorización y validación del DNI ya ocurrieron en el Form Request.
+        $evaluaciones = $finder->findByDni(
+            $request->validated('dni'),
+            $request->user()
+        );
 
-        // 2. LLAMAR AL SERVICIO PARA PROCESAR
-        // Pasamos directamente los datos ya validados.
-        $resultado = ProcesarEvaluacion::execute($validatedData);
-
-        // 3. DEVOLVER RESPUESTA
-        if ($resultado['success']) {
-            return response()->json([
-                'msg'        => $resultado['message'],
-                'usuario_id' => $resultado['usuario_id']
-            ], 201); // 201 Created
-        }
-
-        // Si el servicio falla por alguna razón.
-        return response()->json([
-            'msg'    => $resultado['message'],
-            'errors' => $resultado['errors'] ?? 'Error interno del servidor.'
-        ], 500); // 500 Internal Server Error
+        return response()->json($evaluaciones);
     }
 
     /**
-     * Busca evaluaciones por DNI de cliente, asignadas al asesor autenticado.
-     * Si el usuario es jefe_negocios, obtiene todas las evaluaciones del cliente sin filtrar por asesor.
+     * Almacena una nueva evaluación de cliente.
      */
-    public function index(Request $request) // <-- Acepta el Request
+    public function store(StoreEvaluacionClienteRequest $request, StoreEvaluacionAction $action): JsonResponse
     {
-        $request->validate([
-            'dni' => 'required|string|digits_between:8,9',
-        ]);
+        $resultado = $action->handle($request->validated());
 
-        try {
-            $dni = $request->input('dni');
-            $user = Auth::user();
-            $idAsesorLogeado = $user->id;
-            $isJefeNegocios = $user->id_Rol == 7;
-            $isAsesor = $user->id_Rol == 4;
-
-            // Verificar rol requerido
-            if (!$isAsesor && !$isJefeNegocios) {
-                return response()->json(['msg' => 'Acceso denegado. Se requiere rol: asesor o jefe de negocios'], 403);
-            }
-
-            // Query base
-            $query = EvaluacionClienteModel::with('cliente.datos')
-                ->whereHas('cliente.datos', function ($q) use ($dni) {
-                    $q->where('dni', $dni);
-                })
-                ->latest();
-
-            // Si no es jefe_negocios, filtra por id_Asesor (solo aplica para asesores)
-            if (!$isJefeNegocios) {
-                $query->where('id_Asesor', $idAsesorLogeado);
-            }
-
-            $evaluaciones = $query->get();
-
-            return response()->json($evaluaciones);
-
-        } catch (\Exception $e) {
-            Log::error('Error al obtener evaluaciones por DNI: ' . $e->getMessage());
-            return response()->json(['msg' => 'Error al buscar los datos'], 500);
+        if ($resultado['success']) {
+            return response()->json(['msg' => $resultado['message'], 'usuario_id' => $resultado['usuario_id']], 201);
         }
+
+        return response()->json(['msg' => $resultado['message']], 422);
     }
 
-    
     /**
      * Actualiza una evaluación y los datos del cliente.
      */
-    public function update(Request $request, $evaluacionId)
+    public function update(UpdateEvaluacionClienteRequest $request, int $evaluacionId, UpdateEvaluacionAction $action): JsonResponse
     {
-        $data = $request->all();
-        $usuarioData = $data['usuario'];
-        $creditoData = $data['credito'];
-        $avalData = $data['aval'] ?? null;
+        $resultado = $action->handle($request->validated(), $evaluacionId);
 
-        DB::beginTransaction();
-        try {
-            // 1. Encuentra y actualiza los datos principales
-            $datos = Datos::findOrFail($usuarioData['id']);
-            $datos->update($usuarioData);
-
-            // 2. Actualiza los modelos relacionados (contacto, dirección, etc.)
-            // (Asumiendo una relación de uno a uno para simplificar)
-            $datos->contactos()->first()->update($usuarioData);
-            $datos->direcciones()->first()->update($usuarioData);
-            $datos->empleos()->first()->update($usuarioData);
-            $datos->cuentasBancarias()->first()->update($usuarioData);
-
-            // 3. Actualiza o crea el Aval
-            $usuario = User::find($datos->usuario->id);
-            if ($avalData) {
-                $usuario->avales()->updateOrCreate(
-                    ['id_Cliente' => $usuario->id], // Busca por id_Cliente
-                    $avalData // Actualiza o crea con esta data
-                );
-            } else {
-                // Si no se envía aval, se elimina el existente
-                $usuario->avales()->delete();
-            }
-            
-            // 4. Actualiza la evaluación: cambia estado a PENDIENTE y actualiza datos
-            $evaluacion = EvaluacionClienteModel::findOrFail($evaluacionId);
-            $evaluacion->update([
-                'producto' => $creditoData['producto'],
-                'montoPrestamo' => $creditoData['montoPrestamo'],
-                'tasaInteres' => $creditoData['tasaInteres'],
-                'cuotas' => $creditoData['cuotas'],
-                'modalidadCredito' => $creditoData['modalidadCredito'],
-                'destinoCredito' => $creditoData['destinoCredito'],
-                'periodoCredito' => $creditoData['periodoCredito'],
-                'estado' => 0, // Vuelve a PENDIENTE
-                'observaciones' => null, // Limpia las observaciones de rechazo
-            ]);
-
-            DB::commit();
-            return response()->json(['msg' => 'Evaluación corregida y enviada exitosamente.']);
-
-        } catch (Throwable $e) {
-            DB::rollBack();
-            Log::error('Error al actualizar evaluación: ' . $e->getMessage());
-            return response()->json(['msg' => 'Error al guardar los cambios.'], 500);
+        if ($resultado['success']) {
+            return response()->json(['msg' => $resultado['message']]);
         }
+        
+        return response()->json(['msg' => $resultado['message']], 500);
     }
-
+    
     /**
-     * Actualiza el estado de una evaluación (solo para jefe_negocios: aprobar o rechazar).
+     * Actualiza el estado de una evaluación (Aprobar/Rechazar).
      */
-    public function updateStatus(Request $request, $evaluacionId)
+    public function updateStatus(UpdateEvaluacionStatusRequest $request, int $evaluacionId, UpdateEvaluacionStatusAction $action): JsonResponse
     {
-        $request->validate([
-            'estado' => 'required|in:1,2',
-            'observaciones' => 'nullable|string|required_if:estado,2|max:500'
-        ]);
+        // La autorización (solo jefe de negocios) y la validación ya ocurrieron.
+        $resultado = $action->handle($evaluacionId, $request->validated());
 
-        try {
-            $user = Auth::user();
-            if ($user->id_Rol != 7) {
-                return response()->json(['msg' => 'Acceso denegado. Solo jefe de negocios puede actualizar estados.'], 403);
-            }
-
-            $evaluacion = EvaluacionClienteModel::findOrFail($evaluacionId);
-
-            if ($evaluacion->estado != 0) {
-                return response()->json(['msg' => 'Solo las evaluaciones pendientes pueden ser aprobadas o rechazadas.'], 400);
-            }
-
-            $updateData = [
-                'estado' => $request->estado,
-            ];
-
-            if ($request->estado == 2) {
-                $updateData['observaciones'] = $request->observaciones;
-            } else {
-                $updateData['observaciones'] = null;
-            }
-
-            $evaluacion->update($updateData);
-
-            return response()->json(['msg' => 'Estado de la evaluación actualizado exitosamente.']);
-
-        } catch (\Exception $e) {
-            Log::error('Error al actualizar estado de evaluación: ' . $e->getMessage());
-            return response()->json(['msg' => 'Error al actualizar el estado.'], 500);
+        if ($resultado['success']) {
+            return response()->json(['msg' => $resultado['message']]);
         }
+
+        // Devolvemos el código de estado que la Action nos sugiere.
+        $statusCode = $resultado['status_code'] ?? 500;
+        return response()->json(['msg' => $resultado['message']], $statusCode);
     }
 }

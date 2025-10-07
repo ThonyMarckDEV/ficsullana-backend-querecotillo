@@ -41,7 +41,7 @@ Route::middleware(['auth.jwt', 'checkRoleMW:asesor'])->group(function () {
 Route::middleware(['auth.jwt', 'CheckRolesMW_JEFE_NEGOCIOS_ASESOR'])->group(function () { 
 
     Route::get('/evaluaciones/index', [EvaluacionClienteController::class, 'index']);
-    Route::get('/cliente/{dni}', [ClienteController::class, 'show']);
+    Route::get('/cliente/show/{dni}', [ClienteController::class, 'show']);
     Route::put('/evaluaciones/status/{evaluacionId}', [EvaluacionClienteController::class, 'updateStatus']);
     
 });

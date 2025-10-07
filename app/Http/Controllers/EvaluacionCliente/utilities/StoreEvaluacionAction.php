@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Actions\EvaluacionCliente;
+namespace App\Http\Controllers\EvaluacionCliente\utilities;
 
+use App\Http\Controllers\EvaluacionCliente\services\AvalService;
+use App\Http\Controllers\EvaluacionCliente\services\ClienteDataService;
+use App\Http\Controllers\EvaluacionCliente\services\EvaluacionValidationService;
 use App\Models\EvaluacionCliente;
-use App\Services\EvaluacionCliente\AvalService;
-use App\Services\EvaluacionCliente\ClienteDataService;
-use App\Services\EvaluacionCliente\EvaluacionValidationService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -23,7 +23,7 @@ class StoreEvaluacionAction
     {
         $usuarioData = $data['usuario'];
 
-        // 1. Usa el servicio de validación previa , valida evaluacioens existentes
+        // 1. Usa el servicio de validación previa , valida evaluaciones existentes
         if (isset($usuarioData['id']) && $usuarioData['id']) {
             $validation = $this->validator->checkExisting($usuarioData['id']);
             if (!$validation['passes']) {

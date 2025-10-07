@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\EvaluacionCliente;
+namespace App\Http\Controllers\EvaluacionCliente\services;
 
 use App\Models\Datos;
 use App\Models\User;
