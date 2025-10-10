@@ -43,6 +43,7 @@ class TokenService
             'rol' => $user->rol->nombre,
             'username' => $user->username,
             'nombre' => $user->datos->nombre ?? 'N/A',
+            'dni' => $user->datos->dni ?? 'N/A',
         ];
 
         // Refresh token payload
@@ -112,6 +113,7 @@ class TokenService
             'rol' => $user->rol->nombre,
             'username' => $user->username,
             'nombre' => $user->datos->nombre ?? 'N/A',
+            'dni' => $user->datos->dni ?? 'N/A',
         ];
 
         // Generate access token

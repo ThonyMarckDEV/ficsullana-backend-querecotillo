@@ -43,12 +43,18 @@ Route::middleware(['auth.jwt', 'checkRoleMW:jefe_negocios'])->group(function () 
 });
 
 
-// RUTAS PARA ROL ADMIN Y ASESOR
+// RUTAS PARA ROL JEFE NEGOCIOS Y ASESOR
 Route::middleware(['auth.jwt', 'CheckRolesMW_JEFE_NEGOCIOS_ASESOR'])->group(function () { 
 
-    Route::get('/evaluaciones/index', [EvaluacionClienteController::class, 'index']);
     Route::get('/cliente/show/{dni}', [ClienteController::class, 'show']);
     Route::put('/evaluaciones/status/{evaluacionId}', [EvaluacionClienteController::class, 'updateStatus']);
+    
+});
+
+// RUTAS PARA ROL JEFE NEGOCIOS Y ASESOR Y CLIENTE
+Route::middleware(['auth.jwt', 'CheckRolesMW_JEFE_NEGOCIOS_ASESOR_CLIENTE'])->group(function () { 
+
+    Route::get('/evaluaciones/index', [EvaluacionClienteController::class, 'index']);
     
 });
 
