@@ -69,7 +69,7 @@ class ClienteDataService
 
     private function getDireccionFields(): array
     {
-        return ['direccionFiscal', 'direccionCorrespondencia', 'departamento', 'provincia', 'distrito', 'tipoV vivienda', 'tiempoResidencia', 'referenciaDomicilio'];
+        return ['direccionFiscal', 'direccionCorrespondencia', 'departamento', 'provincia', 'distrito', 'tipoVivienda', 'tiempoResidencia', 'referenciaDomicilio'];
     }
 
     private function getEmpleoFields(): array

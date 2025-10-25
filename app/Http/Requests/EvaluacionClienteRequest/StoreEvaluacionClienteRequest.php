@@ -7,15 +7,6 @@ use Illuminate\Foundation\Http\FormRequest;
 class StoreEvaluacionClienteRequest extends FormRequest
 {
     /**
-     * Determina si el usuario está autorizado para realizar esta solicitud.
-     */
-    public function authorize(): bool
-    {
-        // Se asume que la autenticación se maneja a través de middleware.
-        return true;
-    }
-
-    /**
      * Prepara los datos para la validación.
      * Esta función es la solución clave: decodifica el JSON enviado desde el frontend
      * antes de que Laravel intente validar los datos.
@@ -60,7 +51,7 @@ class StoreEvaluacionClienteRequest extends FormRequest
             'usuario.entidadFinanciera'           => 'required|string|max:100',
             'usuario.direccionFiscal'             => 'required|string|max:255',
             'usuario.direccionCorrespondencia'    => 'nullable|string|max:255',
-            'usuario.tipoVivienda'                => 'nullable|string|max:50',
+            'usuario.tipoVivienda'                => 'required|string|max:50',
             'usuario.tiempoResidencia'            => 'nullable|string|max:50',
             'usuario.referenciaDomicilio'         => 'nullable|string|max:255',
             'usuario.centroLaboral'               => 'nullable|string|max:150',
