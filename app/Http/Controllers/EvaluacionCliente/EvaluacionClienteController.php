@@ -42,13 +42,17 @@ class EvaluacionClienteController extends Controller
      */
     public function store(StoreEvaluacionClienteRequest $request, StoreEvaluacionAction $action): JsonResponse
     {
-        $resultado = $action->handle($request->validated());
+
+        $resultado = $action->handle($request->validated(), $request);
 
         if ($resultado['success']) {
-            return response()->json(['msg' => $resultado['message'], 'usuario_id' => $resultado['usuario_id']], 201);
+            return response()->json([
+                'msg' => $resultado['message'], 
+                'usuario_id' => $resultado['usuario_id']
+            ], 201);
         }
 
-        return response()->json(['msg' => $resultado['message']], 422);
+        return response()->json(['msg' => $resultado['message']], 500);
     }
 
     /**
