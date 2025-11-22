@@ -12,7 +12,7 @@ class Garantia extends Model
     protected $table = 'garantias';
 
     protected $fillable = [
-        'evaluacion_id', 'es_declaracion_jurada', 'moneda',
+        'id_Evaluacion', 'es_declaracion_jurada', 'moneda',
         'clase_garantia', 'documento_garantia', 'tipo_garantia',
         'descripcion_bien', 'direccion_bien', 'monto_garantia',
         'valor_comercial', 'valor_realizacion', 'ficha_registral',

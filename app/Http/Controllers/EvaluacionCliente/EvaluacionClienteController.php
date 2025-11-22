@@ -69,6 +69,29 @@ class EvaluacionClienteController extends Controller
         return response()->json(['msg' => $resultado['message']], 500);
     }
 
+
+    /**
+     * Obtiene el detalle completo de una evaluación por su ID.
+     */
+    public function show(int $id): JsonResponse
+    {
+        // Cargamos la evaluación con todas sus relaciones necesarias
+        $evaluacion = EvaluacionCliente::with([
+            'cliente',                      // Datos del cliente
+            'aval',                         // Datos del aval (si existe)
+            'unidadFamiliar',               // Gastos familiares
+            'datosNegocio',                 // Datos generales del negocio
+            'datosNegocio.detalleInventario', // El inventario anidado dentro de negocio
+            'garantias'                     // Array de garantías
+        ])->find($id);
+
+        if (!$evaluacion) {
+            return response()->json(['message' => 'Evaluación no encontrada'], 404);
+        }
+
+        return response()->json($evaluacion, 200);
+    }
+
      /**
      * Corrige los datos de una evaluación crediticia específica.
      *

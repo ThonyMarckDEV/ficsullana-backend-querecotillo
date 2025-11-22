@@ -118,7 +118,7 @@ class StoreEvaluacionAction
                         }
 
                         Garantia::create([
-                            'evaluacion_id' => $evaluacion->id,
+                            'id_Evaluacion' => $evaluacion->id,
                             ...$garantiaData
                         ]);
                     }

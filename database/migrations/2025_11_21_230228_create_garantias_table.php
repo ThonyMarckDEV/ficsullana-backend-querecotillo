@@ -16,7 +16,7 @@ return new class extends Migration
             
             // Relación con la tabla evaluacion_cliente
             // Asumo que el nombre de tu tabla padre es 'evaluacion_cliente' como pusiste en tu código anterior
-            $table->foreignId('evaluacion_id')->constrained('evaluacion_cliente')->onDelete('cascade');
+            $table->foreignId('id_Evaluacion')->constrained('evaluacion_cliente')->onDelete('cascade');
 
             // --- EL CAMPO DE LOS CHECKBOXES (Mutuamente excluyentes) ---
             // 1 = Declaración Jurada
