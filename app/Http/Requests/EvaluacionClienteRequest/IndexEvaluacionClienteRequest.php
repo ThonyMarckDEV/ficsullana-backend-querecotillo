@@ -12,7 +12,9 @@ class IndexEvaluacionClienteRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'dni' => 'required|string|digits_between:8,9',
+            // Cambiamos 'required' por 'nullable'.
+            // Así, si el frontend no envía DNI, la validación pasa (para listar todo).
+            'dni' => 'nullable|string|max:20', 
         ];
     }
 }

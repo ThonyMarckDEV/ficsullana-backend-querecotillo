@@ -24,13 +24,17 @@ use App\Http\Requests\EvaluacionClienteRequest\UpdateEvaluacionStatusRequest;
 class EvaluacionClienteController extends Controller
 {
     /**
-     * Busca evaluaciones por DNI de cliente.
+     * Lista evaluaciones.
+     * - Si llega 'dni', filtra.
+     * - Si no llega, lista todo (según rol).
      */
     public function index(IndexEvaluacionClienteRequest $request, BuscarEvaluacionService $finder): JsonResponse
     {
-        // La autorización y validación del DNI ya ocurrieron en el Form Request.
+        // Obtenemos el 'dni' validado (ahora puede ser null)
+        $dni = $request->validated('dni');
+
         $evaluaciones = $finder->findByDni(
-            $request->validated('dni'),
+            $dni, 
             $request->user()
         );
 
