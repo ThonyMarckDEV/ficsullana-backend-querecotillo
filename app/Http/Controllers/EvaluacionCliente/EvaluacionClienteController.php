@@ -20,6 +20,7 @@ use App\Http\Requests\EvaluacionClienteRequest\IndexEvaluacionClienteRequest;
 use App\Http\Requests\EvaluacionClienteRequest\StoreEvaluacionClienteRequest;
 use App\Http\Requests\EvaluacionClienteRequest\UpdateEvaluacionClienteRequest;
 use App\Http\Requests\EvaluacionClienteRequest\UpdateEvaluacionStatusRequest;
+use Illuminate\Support\Facades\Log;
 
 class EvaluacionClienteController extends Controller
 {
@@ -59,11 +60,16 @@ class EvaluacionClienteController extends Controller
         return response()->json(['msg' => $resultado['message']], 500);
     }
 
-    /**
-     * Actualiza una evaluación y los datos del cliente.
-     */
     public function update(UpdateEvaluacionClienteRequest $request, int $evaluacionId, UpdateEvaluacionAction $action): JsonResponse
     {
+        // --- ASÍ DEBE QUEDAR LA PARTE DE LOS LOGS ---
+        Log::info("=== REQUEST UPDATE {$evaluacionId} ===");
+        
+        // CORRECCIÓN: Quitamos ->toArray() porque allFiles() ya es un array
+        Log::info('All files received:', $request->allFiles()); 
+        
+        Log::info('All data received:', $request->all());
+
         $resultado = $action->handle($request->validated(), $evaluacionId);
 
         if ($resultado['success']) {

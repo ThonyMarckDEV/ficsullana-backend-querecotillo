@@ -4,29 +4,54 @@ namespace App\Http\Controllers\EvaluacionCliente\services;
 
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class FileStorageService
 {
-    /**
-     * Guarda un archivo en la ruta: /clientes/{idCliente}/evaluaciones/{idEvaluacion}/{nombreArchivo_timestamp.ext}
-     */
-    public function storeFile(UploadedFile $file, int $idCliente, int $idEvaluacion, string $prefix): string
-    {
-        $disk = 'public'; // Usualmente linkeado a storage/app/public
-        
-        // Generar nombre único: firmaCliente_2023-10-27_153022.png
-        $timestamp = Carbon::now()->format('Y-m-d_His');
+    public function storeFile(
+        UploadedFile $file,
+        int $idCliente,
+        int $idEvaluacion,
+        string $subFolder,  // firma-cliente, firma-aval, activo-fijo, etc.
+        string $prefix      // firma_cliente, foto_negocio, etc.
+    ): string {
+
+        $disk = 'public';
         $extension = $file->getClientOriginalExtension();
-        $fileName = "{$prefix}_{$timestamp}.{$extension}";
 
-        // Definir ruta
-        $path = "clientes/{$idCliente}/evaluaciones/{$idEvaluacion}";
+        // Carpeta final
+        $path = "clientes/{$idCliente}/evaluaciones/{$idEvaluacion}/{$subFolder}";
 
-        // Guardar archivo
+        Log::info("Guardando archivo en carpeta: {$path}");
+
+        /* ======================================================
+         * 1. BORRAR ARCHIVOS ANTERIORES EN LA CARPETA
+         * ====================================================== */
+        $previousFiles = Storage::disk($disk)->files($path);
+
+        foreach ($previousFiles as $oldFile) {
+            Storage::disk($disk)->delete($oldFile);
+            Log::info("Archivo anterior eliminado: {$oldFile}");
+        }
+
+        /* ======================================================
+         * 2. GUARDAR NUEVO ARCHIVO CON TIMESTAMP
+         * ====================================================== */
+        $timestamp = now()->format('Y-m-d_His');
+        $fileName  = "{$prefix}_{$timestamp}.{$extension}";
+
         $storedPath = $file->storeAs($path, $fileName, $disk);
 
-        // Retornar URL relativa o absoluta según necesites (aquí devolvemos path relativo)
+        Log::info("Archivo nuevo guardado: {$storedPath}");
+
         return $storedPath;
+    }
+
+    public function deleteFile(?string $path): void
+    {
+        if ($path && Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
+            Log::info("Archivo eliminado manualmente: {$path}");
+        }
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\EvaluacionClienteRequest;
 
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -9,17 +10,18 @@ class UpdateEvaluacionClienteRequest extends FormRequest
 {
     public function rules(): array
     {
-        $usuarioId = $this->input('usuario.id', null);
+      $usuario = User::findOrFail($this->usuario['id']);
+      $idDatos = $usuario->id_Datos;
 
         return [
             // ==========================================
-            // 1. USUARIO (CLIENTE)
+            // 1. USUARIO (CLIENTE) - Sin cambios
             // ==========================================
-            'usuario.id' => 'required|integer|exists:datos,id',
+            'usuario.id' => 'required|integer|exists:usuarios,id',
             'usuario.dni' => [
                 'required',
                 'digits_between:8,9',
-                Rule::unique('datos', 'dni')->ignore($usuarioId)
+                Rule::unique('datos', 'dni')->ignore($idDatos),
             ],
             'usuario.apellidoPaterno'      => 'required|string|max:100',
             'usuario.apellidoMaterno'      => 'nullable|string|max:100',
@@ -51,9 +53,18 @@ class UpdateEvaluacionClienteRequest extends FormRequest
             'usuario.departamento'         => 'required|string|max:100',
             'usuario.distrito'             => 'required|string|max:100',
             'usuario.expuestaPoliticamente' => 'required|boolean',
+            'usuario.firmaCliente'        => [
+                'nullable',
+                Rule::when(
+                    $this->hasFile('usuario.firmaCliente'),
+                    ['image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+                    ['string', 'max:255']
+                )
+            ],
+
 
             // ==========================================
-            // 2. CRÉDITO (TABLA PADRE)
+            // 2. CRÉDITO (TABLA PADRE) - AGREGADO firma_cliente con regla condicional
             // ==========================================
             'credito.producto'             => 'required|string|max:100',
             'credito.montoPrestamo'        => 'required|numeric|min:100',
@@ -65,7 +76,7 @@ class UpdateEvaluacionClienteRequest extends FormRequest
             'credito.observaciones'        => 'nullable|string|max:500',
 
             // ==========================================
-            // 3. DATOS NEGOCIO
+            // 3. DATOS NEGOCIO - REGLAS CONDICIONALES para fotos; AGREGADO foto_negocio
             // ==========================================
             'datosNegocio'                 => 'nullable|array',
             'datosNegocio.ventas_diarias'  => 'nullable|numeric|min:0',
@@ -90,10 +101,33 @@ class UpdateEvaluacionClienteRequest extends FormRequest
             'datosNegocio.cuentas_por_cobrar_monto' => 'nullable|numeric|min:0',
             'datosNegocio.cuentas_por_cobrar_num_clientes' => 'nullable|integer|min:0',
             'datosNegocio.tiempo_recuperacion' => 'nullable|string|max:100',
-            'datosNegocio.foto_apuntes_cobranza' => 'nullable|string|max:255',
+            // Fotos con reglas condicionales (string o file)
+            'datosNegocio.foto_apuntes_cobranza' => [
+                'nullable',
+                Rule::when(
+                    $this->hasFile('datosNegocio.foto_apuntes_cobranza'),
+                    ['image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+                    ['string', 'max:255']
+                )
+            ],
             'datosNegocio.detalle_activo_fijo' => 'nullable|string|max:500',
             'datosNegocio.valor_actual_activo_fijo' => 'nullable|numeric|min:0',
-            'datosNegocio.foto_activo_fijo' => 'nullable|string|max:255',
+            'datosNegocio.foto_activo_fijo' => [
+                'nullable',
+                Rule::when(
+                    $this->hasFile('datosNegocio.foto_activo_fijo'),
+                    ['image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+                    ['string', 'max:255']
+                )
+            ],
+            'datosNegocio.foto_negocio' => [  // AGREGADO
+                'nullable',
+                Rule::when(
+                    $this->hasFile('datosNegocio.foto_negocio'),
+                    ['image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+                    ['string', 'max:255']
+                )
+            ],
             'datosNegocio.dias_efectivo'   => 'nullable|integer|min:0',
             'datosNegocio.pagos_realizados_mes' => 'nullable|numeric|min:0',
             'datosNegocio.gastos_administrativos_fijos' => 'nullable|numeric|min:0',
@@ -105,7 +139,7 @@ class UpdateEvaluacionClienteRequest extends FormRequest
             // Permitimos array para que pase al action:
             'datosNegocio.*'               => 'nullable', 
 
-            // Inventario dentro de negocio - AGREGADAS VALIDACIONES PARA CAMPOS FALTANTES
+            // Inventario - Sin cambios
             'datosNegocio.detalleInventario'   => 'nullable|array',
             'datosNegocio.detalleInventario.*.nombre_producto' => 'required_with:datosNegocio.detalleInventario|string|max:150',
             'datosNegocio.detalleInventario.*.unidad_medida' => 'nullable|string|max:50',
@@ -118,7 +152,7 @@ class UpdateEvaluacionClienteRequest extends FormRequest
             'datosNegocio.detalleInventario.*.updated_at' => 'nullable|date',
 
             // ==========================================
-            // 4. UNIDAD FAMILIAR
+            // 4. UNIDAD FAMILIAR - Sin cambios
             // ==========================================
             'unidadFamiliar'               => 'nullable|array',
             'unidadFamiliar.gastos_alimentacion' => 'nullable|numeric|min:0',
@@ -141,7 +175,7 @@ class UpdateEvaluacionClienteRequest extends FormRequest
             'unidadFamiliar.*'             => 'nullable',
 
             // ==========================================
-            // 5. GARANTÍAS
+            // 5. GARANTÍAS - Sin cambios
             // ==========================================
             'garantias'                    => 'nullable|array',
             'garantias.*.descripcion_bien' => 'required_with:garantias|string|max:500',
@@ -161,7 +195,7 @@ class UpdateEvaluacionClienteRequest extends FormRequest
             'garantias.*'                  => 'nullable',
 
             // ==========================================
-            // 6. AVAL
+            // 6. AVAL - AGREGADO firma_aval con regla condicional
             // ==========================================
             'aval.dniAval'                 => 'sometimes|nullable|digits_between:8,9',
             'aval.apellidoPaternoAval'     => 'sometimes|nullable|string|max:100',
@@ -175,6 +209,14 @@ class UpdateEvaluacionClienteRequest extends FormRequest
             'aval.departamentoAval'        => 'sometimes|nullable|string|max:100',
             'aval.distritoAval'            => 'sometimes|nullable|string|max:100',
             'aval.relacionClienteAval'     => 'sometimes|nullable|string|max:50',
+            'aval.firma_aval'              => [  // AGREGADO
+                'sometimes|nullable',
+                Rule::when(
+                    $this->hasFile('aval.firma_aval'),
+                    ['image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+                    ['string', 'max:255']
+                )
+            ],
         ];
     }
 }
