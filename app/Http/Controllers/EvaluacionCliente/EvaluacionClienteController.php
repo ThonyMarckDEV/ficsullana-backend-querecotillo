@@ -73,20 +73,29 @@ class EvaluacionClienteController extends Controller
         return response()->json(['msg' => $resultado['message']], 500);
     }
 
-
-    /**
+/**
      * Obtiene el detalle completo de una evaluación por su ID.
      */
     public function show(int $id): JsonResponse
     {
-        // Cargamos la evaluación con todas sus relaciones necesarias
         $evaluacion = EvaluacionCliente::with([
-            'cliente',                      // Datos del cliente
-            'aval',                         // Datos del aval (si existe)
-            'unidadFamiliar',               // Gastos familiares
-            'datosNegocio',                 // Datos generales del negocio
-            'datosNegocio.detalleInventario', // El inventario anidado dentro de negocio
-            'garantias'                     // Array de garantías
+            // 1. CARGA PROFUNDA DEL CLIENTE
+            // Cargamos 'cliente', luego su relación 'datos', y luego las sub-relaciones de datos.
+            'cliente.datos.contactos',
+            'cliente.datos.direcciones',
+            'cliente.datos.empleos',
+            'cliente.datos.cuentasBancarias',
+
+            // 2. RELACIONES DE LA EVALUACIÓN
+            'aval',              // Datos del aval
+            'unidadFamiliar',    // Gastos familiares
+            
+            // 3. NEGOCIO E INVENTARIO
+            'datosNegocio',                      // Datos generales
+            'datosNegocio.detalleInventario',    // Inventario anidado
+
+            // 4. GARANTÍAS
+            'garantias'
         ])->find($id);
 
         if (!$evaluacion) {
