@@ -54,4 +54,26 @@ class FileStorageService
             Log::info("Archivo eliminado manualmente: {$path}");
         }
     }
+
+    /**
+     * Busca el archivo en la carpeta física y devuelve la URL pública.
+     */
+    public function getFileUrl(int $idCliente, int $idEvaluacion, string $subFolder): ?string
+    {
+        $disk = 'public';
+        // Reconstruimos la ruta igual que al guardar
+        $path = "clientes/{$idCliente}/evaluaciones/{$idEvaluacion}/{$subFolder}";
+
+        // Escaneamos la carpeta buscando archivos
+        // (Como tu lógica borra los anteriores, solo debería haber 1 o ninguno)
+        $files = Storage::disk($disk)->files($path);
+
+        if (count($files) > 0) {
+            // Agarramos el primer archivo que encontremos (ej: firma_cliente_2025...png)
+            // y generamos la URL pública
+            return Storage::url($files[0]);
+        }
+
+        return null;
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\EvaluacionCliente;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\EvaluacionCliente\services\FileStorageService;
 use App\Http\Requests\EvaluacionClienteRequest\CorrectEvaluacionRequest;
 use App\Models\EvaluacionCliente;
 use Illuminate\Http\JsonResponse;
@@ -14,16 +15,26 @@ use App\Http\Controllers\EvaluacionCliente\utilities\UpdateEvaluacionStatusActio
 
 // Services
 use App\Http\Controllers\EvaluacionCliente\services\BuscarEvaluacionService;
-
+use App\Http\Controllers\EvaluacionCliente\utilities\ShowEvaluacionAction;
 // Form Requests
 use App\Http\Requests\EvaluacionClienteRequest\IndexEvaluacionClienteRequest;
 use App\Http\Requests\EvaluacionClienteRequest\StoreEvaluacionClienteRequest;
 use App\Http\Requests\EvaluacionClienteRequest\UpdateEvaluacionClienteRequest;
 use App\Http\Requests\EvaluacionClienteRequest\UpdateEvaluacionStatusRequest;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class EvaluacionClienteController extends Controller
 {
+
+    protected $fileStorage;
+
+    // Inyectamos el servicio en el constructor
+    public function __construct(FileStorageService $fileStorage)
+    {
+        $this->fileStorage = $fileStorage;
+    }
+
     /**
      * Lista evaluaciones.
      * - Si llega 'dni', filtra.
@@ -79,30 +90,13 @@ class EvaluacionClienteController extends Controller
         return response()->json(['msg' => $resultado['message']], 500);
     }
 
-/**
-     * Obtiene el detalle completo de una evaluación por su ID.
+   /**
+     * Muestra el detalle de una evaluación específica.
      */
-    public function show(int $id): JsonResponse
+    public function show(int $id, ShowEvaluacionAction $showAction): JsonResponse
     {
-        $evaluacion = EvaluacionCliente::with([
-            // 1. CARGA PROFUNDA DEL CLIENTE
-            // Cargamos 'cliente', luego su relación 'datos', y luego las sub-relaciones de datos.
-            'cliente.datos.contactos',
-            'cliente.datos.direcciones',
-            'cliente.datos.empleos',
-            'cliente.datos.cuentasBancarias',
-
-            // 2. RELACIONES DE LA EVALUACIÓN
-            'aval',              // Datos del aval
-            'unidadFamiliar',    // Gastos familiares
-            
-            // 3. NEGOCIO E INVENTARIO
-            'datosNegocio',                      // Datos generales
-            'datosNegocio.detalleInventario',    // Inventario anidado
-
-            // 4. GARANTÍAS
-            'garantias'
-        ])->find($id);
+        // Delegamos toda la lógica al Action
+        $evaluacion = $showAction->handle($id);
 
         if (!$evaluacion) {
             return response()->json(['message' => 'Evaluación no encontrada'], 404);
