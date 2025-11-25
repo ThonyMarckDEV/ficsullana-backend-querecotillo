@@ -209,10 +209,11 @@ class UpdateEvaluacionClienteRequest extends FormRequest
             'aval.departamentoAval'        => 'sometimes|nullable|string|max:100',
             'aval.distritoAval'            => 'sometimes|nullable|string|max:100',
             'aval.relacionClienteAval'     => 'sometimes|nullable|string|max:50',
-            'aval.firma_aval'              => [  // AGREGADO
-                'sometimes|nullable',
+            'aval.firmaAval'              => [ 
+                'sometimes',
+                'nullable',
                 Rule::when(
-                    $this->hasFile('aval.firma_aval'),
+                    $this->hasFile('aval.firmaAval'), // Aquí también firmaAval
                     ['image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
                     ['string', 'max:255']
                 )

@@ -86,21 +86,22 @@ class UpdateEvaluacionAction
                 /* ------------------------------
                  * FIRMA DEL AVAL
                  * ------------------------------ */
-                if (!empty($data['aval']['firma_aval']) &&
-                    $data['aval']['firma_aval'] instanceof UploadedFile) {
+                if (!empty($data['aval']['firmaAval']) &&
+                    $data['aval']['firmaAval'] instanceof UploadedFile) {
 
                     $ruta = $this->fileStorage->storeFile(
-                        $data['aval']['firma_aval'],
+                        $data['aval']['firmaAval'],
                         $clienteId,
                         $evaluacionId,
                         'firma-aval',
                         'firma_aval'
                     );
 
-                    $data['aval']['firma_aval_ruta'] = $ruta;
+                    $data['aval']['firmaAval_ruta'] = $ruta;
                 }
 
-                unset($data['aval']['firma_aval']);
+                unset($data['aval']['firmaAval']);      // Borra el binario
+                unset($data['aval']['firmaAval_ruta']); // Borra la ruta (si no quieres que vaya a la BD)
 
                 /* ======================================================
                  * 2. ACTUALIZAR BD
