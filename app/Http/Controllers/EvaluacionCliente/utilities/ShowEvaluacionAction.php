@@ -34,12 +34,10 @@ class ShowEvaluacionAction
         }
 
         // 2. OBTENER IDs PARA BUSCAR ARCHIVOS
-        // Asumiendo que la carpeta padre es el ID del cliente
         $idCliente = $evaluacion->cliente->id; 
         $idEvaluacion = $evaluacion->id;
 
         // 3. BUSCAR FIRMA CLIENTE
-        // Carpeta física: 'firma-cliente'
         $urlCliente = $this->fileStorage->getFileUrl($idCliente, $idEvaluacion, 'firma-cliente');
         
         if ($evaluacion->cliente && $evaluacion->cliente->datos) {
@@ -47,25 +45,26 @@ class ShowEvaluacionAction
         }
 
         // 4. BUSCAR FIRMA AVAL
-        // Carpeta física: 'firma-aval'
         $urlAval = $this->fileStorage->getFileUrl($idCliente, $idEvaluacion, 'firma-aval');
         
         if ($evaluacion->aval) {
             $evaluacion->aval->url_firma = $urlAval;
         }
 
-        // 5. (OPCIONAL) FOTOS NEGOCIO
-        /*
+        // 5. BUSCAR FOTOS DEL NEGOCIO (Cobranza y Activo Fijo)
         if ($evaluacion->datosNegocio) {
-            // Ejemplo para foto del negocio
-            $evaluacion->datosNegocio->url_foto_negocio = 
-                $this->fileStorage->getFileUrl($idCliente, $idEvaluacion, 'negocio');
-                
-            // Ejemplo para foto cobranza
+            // Foto Apuntes de Cobranza
             $evaluacion->datosNegocio->url_foto_cobranza = 
                 $this->fileStorage->getFileUrl($idCliente, $idEvaluacion, 'fotos-cobranza');
+
+            // Foto Activo Fijo
+            $evaluacion->datosNegocio->url_foto_activo_fijo = 
+                $this->fileStorage->getFileUrl($idCliente, $idEvaluacion, 'activo-fijo');
+                
+            // (Opcional) Foto del Negocio General
+            $evaluacion->datosNegocio->url_foto_negocio = 
+                $this->fileStorage->getFileUrl($idCliente, $idEvaluacion, 'negocio');
         }
-        */
 
         return $evaluacion;
     }

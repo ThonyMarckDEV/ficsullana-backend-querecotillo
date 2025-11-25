@@ -42,7 +42,6 @@ class StoreEvaluacionAction
             $result = DB::transaction(function () use ($validatedData, $request) {
                 
                 // 2. Crear/Actualizar Cliente
-                // (Nota: Asegúrate de que tu ClienteDataService también maneje fechas vacías si es necesario)
                 $usuario = $this->clienteService->createOrUpdate($validatedData['usuario']);
 
                 // 3. Gestionar Aval
@@ -74,23 +73,66 @@ class StoreEvaluacionAction
                 if (!empty($validatedData['datosNegocio'])) {
                     $negocioData = $validatedData['datosNegocio'];
                     
-                    // CORRECCIÓN PREVENTIVA: Fecha última compra vacía a NULL
+                    // Limpieza de fecha vacía
                     if (array_key_exists('fecha_ultima_compra', $negocioData) && empty($negocioData['fecha_ultima_compra'])) {
                         $negocioData['fecha_ultima_compra'] = null;
                     }
 
-                    // Manejo de imágenes
-                    if ($request->hasFile('fotoApuntesCobranza')) {
-                        $negocioData['foto_apuntes_cobranza'] = $this->fileStorage->storeFile(
-                            $request->file('fotoApuntesCobranza'), $usuario->id, $evaluacion->id, 'apuntes_cobranza'
+                    // --- MANEJO DE FOTOS DEL NEGOCIO (FÍSICO SOLAMENTE) ---
+                    
+                    // Foto Apuntes Cobranza
+                    // Nombre del campo en el FormData frontend: 'fotoApuntesCobranza' (camelCase)
+                    // O 'datosNegocio.foto_apuntes_cobranza' dependiendo de cómo lo envíes. 
+                    // Asumiremos que viene en el request global o dentro del array validado como UploadedFile.
+                    
+                    // Verificamos si existe en el Request global o en validatedData
+                    $fileCobranza = $request->file('datosNegocio.foto_apuntes_cobranza') ?? $request->file('fotoApuntesCobranza');
+                    
+                    if ($fileCobranza) {
+                        $this->fileStorage->storeFile(
+                            $fileCobranza,
+                            $usuario->id,
+                            $evaluacion->id,
+                            'fotos-cobranza',         // Subfolder
+                            'foto_apuntes_cobranza'   // Prefix
                         );
                     }
-                    if ($request->hasFile('fotoActivoFijo')) {
-                        $negocioData['foto_activo_fijo'] = $this->fileStorage->storeFile(
-                            $request->file('fotoActivoFijo'), $usuario->id, $evaluacion->id, 'activo_fijo'
-                        );
-                    }
+                    // IMPORTANTE: Quitamos el campo del array para que NO intente guardar ruta en BD
+                    unset($negocioData['foto_apuntes_cobranza']);
+                    $negocioData['foto_apuntes_cobranza'] = null; // Asegurar NULL en BD
 
+                    // Foto Activo Fijo
+                    $fileActivo = $request->file('datosNegocio.foto_activo_fijo') ?? $request->file('fotoActivoFijo');
+
+                    if ($fileActivo) {
+                        $this->fileStorage->storeFile(
+                            $fileActivo,
+                            $usuario->id,
+                            $evaluacion->id,
+                            'activo-fijo',            // Subfolder
+                            'foto_activo_fijo'        // Prefix
+                        );
+                    }
+                    // Quitamos del array
+                    unset($negocioData['foto_activo_fijo']);
+                    $negocioData['foto_activo_fijo'] = null; // Asegurar NULL en BD
+
+                     // Foto Negocio (Si existiera)
+                     $fileNegocio = $request->file('datosNegocio.foto_negocio') ?? $request->file('fotoNegocio');
+                     if ($fileNegocio) {
+                         $this->fileStorage->storeFile(
+                             $fileNegocio,
+                             $usuario->id,
+                             $evaluacion->id,
+                             'negocio',
+                             'foto_negocio'
+                         );
+                     }
+                     unset($negocioData['foto_negocio']);
+                     $negocioData['foto_negocio'] = null;
+
+
+                    // Crear registro en BD (sin rutas de archivos)
                     $datosNegocio = DatosNegocio::create([
                         'id_Evaluacion' => $evaluacion->id,
                         ...$negocioData
@@ -111,8 +153,6 @@ class StoreEvaluacionAction
                 if (!empty($validatedData['garantias'])) {
                     foreach ($validatedData['garantias'] as $garantiaData) {
                         
-                        // --- SOLUCIÓN DEL ERROR ---
-                        // Convertimos la cadena vacía "" a NULL antes de crear
                         if (array_key_exists('fecha_ultima_valuacion', $garantiaData) && empty($garantiaData['fecha_ultima_valuacion'])) {
                             $garantiaData['fecha_ultima_valuacion'] = null;
                         }
@@ -124,22 +164,33 @@ class StoreEvaluacionAction
                     }
                 }
 
-                // 8. Guardar Firmas
-                if ($request->hasFile('firmaCliente')) {
+                // 8. Guardar Firmas (Solo físico)
+                
+                // Firma Cliente
+                // Intentamos buscar en el request con el nombre exacto del FormData
+                // Nota: A veces en arrays anidados el request->file se accede con notación punto 'usuario.firmaCliente'
+                $firmaCliente = $request->file('usuario.firmaCliente') ?? $request->file('firmaCliente');
+
+                if ($firmaCliente) {
                     $this->fileStorage->storeFile(
-                        $request->file('firmaCliente'), 
+                        $firmaCliente, 
                         $usuario->id, 
                         $evaluacion->id, 
-                        'firmaCliente'
+                        'firma-cliente', // Subfolder (debe coincidir con ShowEvaluacionAction)
+                        'firma_cliente'  // Prefix
                     );
                 }
 
-                if ($request->hasFile('firmaAval')) {
+                // Firma Aval
+                $firmaAval = $request->file('aval.firmaAval') ?? $request->file('firmaAval');
+
+                if ($firmaAval) {
                     $this->fileStorage->storeFile(
-                        $request->file('firmaAval'), 
+                        $firmaAval, 
                         $usuario->id, 
                         $evaluacion->id, 
-                        'firmaAval'
+                        'firma-aval',   // Subfolder (debe coincidir con ShowEvaluacionAction)
+                        'firma_aval'    // Prefix
                     );
                 }
 
@@ -147,6 +198,7 @@ class StoreEvaluacionAction
             });
 
             return ['success' => true, 'message' => 'Evaluación completa registrada exitosamente.', 'usuario_id' => $result];
+
         } catch (Throwable $e) {
             Log::error('Error en StoreEvaluacionAction: ' . $e->getMessage());
             Log::error($e->getTraceAsString()); 
