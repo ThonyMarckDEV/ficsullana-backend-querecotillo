@@ -23,6 +23,7 @@ use App\Http\Requests\EvaluacionClienteRequest\UpdateEvaluacionClienteRequest;
 use App\Http\Requests\EvaluacionClienteRequest\UpdateEvaluacionStatusRequest;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class EvaluacionClienteController extends Controller
 {
@@ -142,5 +143,60 @@ class EvaluacionClienteController extends Controller
         // Devolvemos el código de estado que la Action nos sugiere.
         $statusCode = $resultado['status_code'] ?? 500;
         return response()->json(['msg' => $resultado['message']], $statusCode);
+    }
+
+
+       /**
+     * Obtiene las firmas en Base64 directamente del DISCO (File System).
+     * Ignora la BD y busca en la estructura de carpetas definida.
+     */
+    public function getFirmas(int $id): JsonResponse
+    {
+        // 1. Necesitamos el ID del cliente para armar la ruta
+        $evaluacion = EvaluacionCliente::select('id', 'id_Cliente')->find($id);
+
+        if (!$evaluacion) {
+            return response()->json(['message' => 'Evaluación no encontrada'], 404);
+        }
+
+        $clienteId = $evaluacion->id_Cliente;
+        $evaluacionId = $evaluacion->id;
+
+        // 2. Definir las carpetas según tu estructura
+        $pathClienteFolder = "clientes/{$clienteId}/evaluaciones/{$evaluacionId}/firma-cliente";
+        $pathAvalFolder = "clientes/{$clienteId}/evaluaciones/{$evaluacionId}/firma-aval";
+
+        // 3. Helper para buscar el archivo en la carpeta y convertir a Base64
+        $buscarYConvertir = function ($folderPath) {
+            // Escaneamos la carpeta (porque el nombre tiene timestamp aleatorio)
+            $files = Storage::disk('public')->files($folderPath);
+
+            // Si no hay archivos, retornamos null
+            if (empty($files)) {
+                return null;
+            }
+
+            // Tomamos el primer archivo encontrado (asumiendo que limpias los viejos)
+            $filePath = $files[0];
+            
+            // Obtenemos ruta absoluta para leer el contenido
+            $fullPath = Storage::disk('public')->path($filePath);
+
+            if (!file_exists($fullPath)) {
+                return null;
+            }
+
+            // Leemos y codificamos
+            $fileData = file_get_contents($fullPath);
+            $mimeType = mime_content_type($fullPath);
+            $base64 = base64_encode($fileData);
+
+            return 'data:' . $mimeType . ';base64,' . $base64;
+        };
+
+        return response()->json([
+            'firma_cliente' => $buscarYConvertir($pathClienteFolder),
+            'firma_aval'    => $buscarYConvertir($pathAvalFolder),
+        ]);
     }
 }
