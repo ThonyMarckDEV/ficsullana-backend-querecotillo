@@ -73,19 +73,14 @@ class StoreEvaluacionAction
                 if (!empty($validatedData['datosNegocio'])) {
                     $negocioData = $validatedData['datosNegocio'];
                     
-                    // Limpieza de fecha vacía
                     if (array_key_exists('fecha_ultima_compra', $negocioData) && empty($negocioData['fecha_ultima_compra'])) {
                         $negocioData['fecha_ultima_compra'] = null;
                     }
 
-                    // --- MANEJO DE FOTOS DEL NEGOCIO (FÍSICO SOLAMENTE) ---
+                    // --- MANEJO DE FOTOS DEL NEGOCIO ---
                     
                     // Foto Apuntes Cobranza
-                    // Nombre del campo en el FormData frontend: 'fotoApuntesCobranza' (camelCase)
-                    // O 'datosNegocio.foto_apuntes_cobranza' dependiendo de cómo lo envíes. 
-                    // Asumiremos que viene en el request global o dentro del array validado como UploadedFile.
-                    
-                    // Verificamos si existe en el Request global o en validatedData
+                    // Intenta buscar en el array anidado O en el root del request (gracias al append manual del frontend)
                     $fileCobranza = $request->file('datosNegocio.foto_apuntes_cobranza') ?? $request->file('fotoApuntesCobranza');
                     
                     if ($fileCobranza) {
@@ -93,13 +88,11 @@ class StoreEvaluacionAction
                             $fileCobranza,
                             $usuario->id,
                             $evaluacion->id,
-                            'fotos-cobranza',         // Subfolder
-                            'foto_apuntes_cobranza'   // Prefix
+                            'fotos-cobranza',     // Subfolder
+                            'foto_apuntes_cobranza' // Prefix
                         );
                     }
-                    // IMPORTANTE: Quitamos el campo del array para que NO intente guardar ruta en BD
-                    unset($negocioData['foto_apuntes_cobranza']);
-                    $negocioData['foto_apuntes_cobranza'] = null; // Asegurar NULL en BD
+                    unset($negocioData['foto_apuntes_cobranza']); // Evitar error en insert BD
 
                     // Foto Activo Fijo
                     $fileActivo = $request->file('datosNegocio.foto_activo_fijo') ?? $request->file('fotoActivoFijo');
@@ -109,13 +102,11 @@ class StoreEvaluacionAction
                             $fileActivo,
                             $usuario->id,
                             $evaluacion->id,
-                            'activo-fijo',            // Subfolder
-                            'foto_activo_fijo'        // Prefix
+                            'activo-fijo',       
+                            'foto_activo_fijo'    
                         );
                     }
-                    // Quitamos del array
                     unset($negocioData['foto_activo_fijo']);
-                    $negocioData['foto_activo_fijo'] = null; // Asegurar NULL en BD
 
                      // Foto Negocio (Si existiera)
                      $fileNegocio = $request->file('datosNegocio.foto_negocio') ?? $request->file('fotoNegocio');
@@ -129,10 +120,8 @@ class StoreEvaluacionAction
                          );
                      }
                      unset($negocioData['foto_negocio']);
-                     $negocioData['foto_negocio'] = null;
 
-
-                    // Crear registro en BD (sin rutas de archivos)
+                    // Crear registro en BD
                     $datosNegocio = DatosNegocio::create([
                         'id_Evaluacion' => $evaluacion->id,
                         ...$negocioData
@@ -164,11 +153,9 @@ class StoreEvaluacionAction
                     }
                 }
 
-                // 8. Guardar Firmas (Solo físico)
+                // 8. Guardar Firmas
                 
                 // Firma Cliente
-                // Intentamos buscar en el request con el nombre exacto del FormData
-                // Nota: A veces en arrays anidados el request->file se accede con notación punto 'usuario.firmaCliente'
                 $firmaCliente = $request->file('usuario.firmaCliente') ?? $request->file('firmaCliente');
 
                 if ($firmaCliente) {
@@ -176,8 +163,8 @@ class StoreEvaluacionAction
                         $firmaCliente, 
                         $usuario->id, 
                         $evaluacion->id, 
-                        'firma-cliente', // Subfolder (debe coincidir con ShowEvaluacionAction)
-                        'firma_cliente'  // Prefix
+                        'firma-cliente', 
+                        'firma_cliente'  
                     );
                 }
 
@@ -189,8 +176,8 @@ class StoreEvaluacionAction
                         $firmaAval, 
                         $usuario->id, 
                         $evaluacion->id, 
-                        'firma-aval',   // Subfolder (debe coincidir con ShowEvaluacionAction)
-                        'firma_aval'    // Prefix
+                        'firma-aval',   
+                        'firma_aval'    
                     );
                 }
 
