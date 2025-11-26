@@ -62,14 +62,18 @@ class StoreEvaluacionClienteRequest extends FormRequest
             'credito.periodoCredito'      => 'required|string',
 
             // --- 3. AVAL ---
-            'aval'                        => 'nullable|array', 
-            'aval.dniAval'                => 'required_with:aval.apellidoPaternoAval',
-            // Agregar campos faltantes del aval si los usas (opcional pero recomendado)
-            'aval.nombresAval'            => 'nullable|string',
-            'aval.apellidoPaternoAval'    => 'nullable|string',
-            'aval.apellidoMaternoAval'    => 'nullable|string',
-            'aval.telefonoMovilAval'      => 'nullable|string',
-            'aval.direccionAval'          => 'nullable|string',
+            'aval.dniAval'                 => 'sometimes|nullable|digits_between:8,9',
+            'aval.apellidoPaternoAval'     => 'sometimes|nullable|string|max:100',
+            'aval.apellidoMaternoAval'     => 'sometimes|nullable|string|max:100',
+            'aval.nombresAval'             => 'sometimes|nullable|string|max:100',
+            'aval.telefonoFijoAval'        => 'sometimes|nullable|digits_between:6,9',
+            'aval.telefonoMovilAval'       => 'sometimes|nullable|digits:9',
+            'aval.direccionAval'           => 'sometimes|nullable|string|max:255',
+            'aval.referenciaDomicilioAval' => 'sometimes|nullable|string|max:255',
+            'aval.provinciaAval'           => 'sometimes|nullable|string|max:100',
+            'aval.departamentoAval'        => 'sometimes|nullable|string|max:100',
+            'aval.distritoAval'            => 'sometimes|nullable|string|max:100',
+            'aval.relacionClienteAval'     => 'sometimes|nullable|string|max:50',
 
             // --- 4. UNIDAD FAMILIAR ---
             'unidadFamiliar'                      => 'required|array',

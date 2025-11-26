@@ -2,22 +2,38 @@
 
 namespace App\Http\Controllers\EvaluacionCliente\services;
 
+use App\Models\ClienteAval;
 use App\Models\User;
 
 class AvalService
 {
     /**
-     * Gestiona el aval de un usuario: lo crea, actualiza o elimina.
-     *
-     * @param User $usuario El usuario al que pertenece el aval.
-     * @param array|null $avalData Los datos del aval, o null para eliminarlo.
+     * Gestiona el aval y retorna el modelo creado/actualizado.
      */
-    public function manage(User $usuario, ?array $avalData): void
+    public function manage(User $cliente, ?array $data): ?ClienteAval
     {
-        if ($avalData && !empty($avalData['dniAval'])) {
-            $usuario->avales()->updateOrCreate(['id_Cliente' => $usuario->id], $avalData);
-        } else {
-            $usuario->avales()->delete();
+        if (empty($data) || empty($data['dniAval'])) {
+            return null;
         }
+
+        return ClienteAval::updateOrCreate(
+            [
+                'id_Cliente' => $cliente->id,
+                'dniAval'    => $data['dniAval']
+            ],
+            [
+                'apellidoPaternoAval'     => $data['apellidoPaternoAval'] ?? null,
+                'apellidoMaternoAval'     => $data['apellidoMaternoAval'] ?? null,
+                'nombresAval'             => $data['nombresAval'] ?? null,
+                'telefonoFijoAval'        => $data['telefonoFijoAval'] ?? null,
+                'telefonoMovilAval'       => $data['telefonoMovilAval'] ?? null,
+                'direccionAval'           => $data['direccionAval'] ?? null,
+                'referenciaDomicilioAval' => $data['referenciaDomicilioAval'] ?? null,
+                'departamentoAval'        => $data['departamentoAval'] ?? null,
+                'provinciaAval'           => $data['provinciaAval'] ?? null,
+                'distritoAval'            => $data['distritoAval'] ?? null,
+                'relacionClienteAval'     => $data['relacionClienteAval'] ?? null,
+            ]
+        );
     }
 }

@@ -45,4 +45,12 @@ class ClienteAval extends Model
     {
         return $this->belongsTo(User::class, 'id_Cliente' , 'id');
     }
+
+      /**
+     * Relación: Un aval puede estar en muchas evaluaciones.
+     */
+    public function evaluaciones()
+    {
+        return $this->hasMany(EvaluacionCliente::class, 'id_Cliente_Aval');
+    }
 }

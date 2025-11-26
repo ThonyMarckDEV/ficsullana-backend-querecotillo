@@ -44,13 +44,17 @@ class StoreEvaluacionAction
                 // 2. Crear/Actualizar Cliente
                 $usuario = $this->clienteService->createOrUpdate($validatedData['usuario']);
 
-                // 3. Gestionar Aval
-                $this->avalService->manage($usuario, $validatedData['aval'] ?? []);
+                // 3. Gestionar Aval (Devuelve el Modelo ClienteAval o null)
+                $avalModel = $this->avalService->manage($usuario, $validatedData['aval'] ?? []);
+                
+                // Obtenemos el ID si existe el aval
+                $idAval = $avalModel ? $avalModel->id : null;
 
-                // 4. Crear Evaluación
+                // 4. Crear Evaluación (Usando el id_Cliente_Aval)
                 $evaluacion = EvaluacionCliente::create([
                     'id_Asesor'        => Auth::id(),
                     'id_Cliente'       => $usuario->id,
+                    'id_Cliente_Aval'  => $idAval, // <--- AQUI SE VINCULA EL AVAL
                     'producto'         => $validatedData['credito']['producto'],
                     'montoPrestamo'    => $validatedData['credito']['montoPrestamo'],
                     'tasaInteres'      => $validatedData['credito']['tasaInteres'],
@@ -59,6 +63,7 @@ class StoreEvaluacionAction
                     'destinoCredito'   => $validatedData['credito']['destinoCredito'],
                     'periodoCredito'   => $validatedData['credito']['periodoCredito'],
                     'estado'           => 0, // Pendiente
+                    'observaciones'    => null
                 ]);
 
                 // 5. Guardar Unidad Familiar
@@ -77,47 +82,25 @@ class StoreEvaluacionAction
                         $negocioData['fecha_ultima_compra'] = null;
                     }
 
-                    // --- MANEJO DE FOTOS DEL NEGOCIO ---
-                    
+                    // --- FOTOS DEL NEGOCIO ---
                     // Foto Apuntes Cobranza
-                    // Intenta buscar en el array anidado O en el root del request (gracias al append manual del frontend)
                     $fileCobranza = $request->file('datosNegocio.foto_apuntes_cobranza') ?? $request->file('fotoApuntesCobranza');
-                    
                     if ($fileCobranza) {
-                        $this->fileStorage->storeFile(
-                            $fileCobranza,
-                            $usuario->id,
-                            $evaluacion->id,
-                            'fotos-cobranza',     // Subfolder
-                            'foto_apuntes_cobranza' // Prefix
-                        );
+                        $this->fileStorage->storeFile($fileCobranza, $usuario->id, $evaluacion->id, 'fotos-cobranza', 'foto_apuntes_cobranza');
                     }
-                    unset($negocioData['foto_apuntes_cobranza']); // Evitar error en insert BD
+                    unset($negocioData['foto_apuntes_cobranza']); 
 
                     // Foto Activo Fijo
                     $fileActivo = $request->file('datosNegocio.foto_activo_fijo') ?? $request->file('fotoActivoFijo');
-
                     if ($fileActivo) {
-                        $this->fileStorage->storeFile(
-                            $fileActivo,
-                            $usuario->id,
-                            $evaluacion->id,
-                            'activo-fijo',       
-                            'foto_activo_fijo'    
-                        );
+                        $this->fileStorage->storeFile($fileActivo, $usuario->id, $evaluacion->id, 'activo-fijo', 'foto_activo_fijo');
                     }
                     unset($negocioData['foto_activo_fijo']);
 
-                     // Foto Negocio (Si existiera)
+                     // Foto Negocio
                      $fileNegocio = $request->file('datosNegocio.foto_negocio') ?? $request->file('fotoNegocio');
                      if ($fileNegocio) {
-                         $this->fileStorage->storeFile(
-                             $fileNegocio,
-                             $usuario->id,
-                             $evaluacion->id,
-                             'negocio',
-                             'foto_negocio'
-                         );
+                         $this->fileStorage->storeFile($fileNegocio, $usuario->id, $evaluacion->id, 'negocio', 'foto_negocio');
                      }
                      unset($negocioData['foto_negocio']);
 
@@ -127,7 +110,7 @@ class StoreEvaluacionAction
                         ...$negocioData
                     ]);
 
-                    // 6.1. Detalle Inventario
+                    // Detalle Inventario
                     if (!empty($negocioData['detalleInventario'])) {
                         foreach ($negocioData['detalleInventario'] as $item) {
                             DetalleInventarioNegocio::create([
@@ -141,11 +124,9 @@ class StoreEvaluacionAction
                 // 7. Guardar Garantías
                 if (!empty($validatedData['garantias'])) {
                     foreach ($validatedData['garantias'] as $garantiaData) {
-                        
                         if (array_key_exists('fecha_ultima_valuacion', $garantiaData) && empty($garantiaData['fecha_ultima_valuacion'])) {
                             $garantiaData['fecha_ultima_valuacion'] = null;
                         }
-
                         Garantia::create([
                             'id_Evaluacion' => $evaluacion->id,
                             ...$garantiaData
@@ -154,31 +135,16 @@ class StoreEvaluacionAction
                 }
 
                 // 8. Guardar Firmas
-                
                 // Firma Cliente
                 $firmaCliente = $request->file('usuario.firmaCliente') ?? $request->file('firmaCliente');
-
                 if ($firmaCliente) {
-                    $this->fileStorage->storeFile(
-                        $firmaCliente, 
-                        $usuario->id, 
-                        $evaluacion->id, 
-                        'firma-cliente', 
-                        'firma_cliente'  
-                    );
+                    $this->fileStorage->storeFile($firmaCliente, $usuario->id, $evaluacion->id, 'firma-cliente', 'firma_cliente');
                 }
 
                 // Firma Aval
                 $firmaAval = $request->file('aval.firmaAval') ?? $request->file('firmaAval');
-
                 if ($firmaAval) {
-                    $this->fileStorage->storeFile(
-                        $firmaAval, 
-                        $usuario->id, 
-                        $evaluacion->id, 
-                        'firma-aval',   
-                        'firma_aval'    
-                    );
+                    $this->fileStorage->storeFile($firmaAval, $usuario->id, $evaluacion->id, 'firma-aval', 'firma_aval');
                 }
 
                 return $usuario->id;

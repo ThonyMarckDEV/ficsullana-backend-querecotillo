@@ -10,31 +10,33 @@ use Throwable;
 
 class ClienteController extends Controller
 {
-
-         /**
-     * Obtiene todos los datos asociados a un cliente por su DNI para la corrección.
+    /**
+     * Obtiene todos los datos asociados a un cliente por su DNI.
+     * Devuelve lista de avales históricos para selección en frontend.
      */
     public function show($dni)
     {
         try {
-             // Esta consulta ahora podrá seguir la cadena de relaciones sin problemas
+            // Cargar datos del cliente y sus avales históricos
             $datos = Datos::with([
-                'usuario.avales', // Carga el usuario y, a través de él, sus avales
+                'usuario.avales', // Relación hasMany en User
                 'contactos', 
                 'direcciones', 
                 'empleos', 
                 'cuentasBancarias'
             ])->where('dni', $dni)->firstOrFail();
 
-            // Buscamos la última evaluación rechazada para ese cliente
+            // Buscamos la última evaluación rechazada (dato informativo)
             $evaluacion = EvaluacionClienteModel::whereHas('cliente.datos', function ($query) use ($dni) {
                 $query->where('dni', $dni);
             })->where('estado', 2)->latest()->first();
 
             return response()->json([
                 'datosCliente' => $datos,
-                'evaluacion' => $evaluacion,
-                'aval' => $datos->usuario?->avales->first() ?? null
+                'evaluacion'   => $evaluacion,
+                // CORRECCIÓN: Devolvemos la lista completa, no solo el primero.
+                // Si no tiene, devuelve array vacío.
+                'avales'       => $datos->usuario?->avales ?? [] 
             ]);
 
         } catch (Throwable $e) {
@@ -42,5 +44,4 @@ class ClienteController extends Controller
             return response()->json(['msg' => 'No se encontraron datos para el DNI proporcionado.'], 404);
         }
     }
-
 }

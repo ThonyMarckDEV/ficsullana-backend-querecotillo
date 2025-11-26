@@ -27,6 +27,7 @@ class EvaluacionCliente extends Model
     protected $fillable = [
         'id_Asesor',
         'id_Cliente',
+        'id_Cliente_Aval',
         'producto',
         'montoPrestamo',
         'tasaInteres',
@@ -58,11 +59,10 @@ class EvaluacionCliente extends Model
      * Relación con el AVAL (Corregida en el paso anterior).
      * Comparte 'id_Cliente' con la tabla 'cliente_avales'.
      */
-    public function aval(): HasOne
+    public function aval()
     {
-        return $this->hasOne(ClienteAval::class, 'id_Cliente', 'id_Cliente');
+        return $this->belongsTo(ClienteAval::class, 'id_Cliente_Aval');
     }
-
     /**
      * Relación con UNIDAD FAMILIAR (Soluciona tu error actual).
      * La tabla 'unidad_familiar' tiene 'id_Evaluacion'.
@@ -90,6 +90,8 @@ class EvaluacionCliente extends Model
     {
         return $this->hasMany(Garantia::class, 'id_Evaluacion', 'id');
     }
+
+
 
 
 }

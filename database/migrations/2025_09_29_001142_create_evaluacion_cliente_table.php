@@ -16,6 +16,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('id_Asesor');
             $table->unsignedBigInteger('id_Cliente');
+            $table->unsignedBigInteger('id_Cliente_Aval')->nullable();
             $table->string('producto');
             $table->decimal('montoPrestamo', 10, 2);
             $table->integer('tasaInteres');
@@ -30,6 +31,7 @@ return new class extends Migration
 
             $table->foreign('id_Asesor')->references('id')->on('usuarios')->onDelete('cascade');
             $table->foreign('id_Cliente')->references('id')->on('usuarios')->onDelete('cascade');
+            $table->foreign('id_Cliente_Aval')->references('id')->on('cliente_avales')->onDelete('set null');
         });
     }
 
