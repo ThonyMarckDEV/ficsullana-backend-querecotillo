@@ -16,9 +16,10 @@ class BuscarEvaluacionService
      * @param User $user El usuario autenticado.
      * @return Collection
      */
-    public function findByDni(?string $dni, User $user): Collection
+   // Actualiza la firma del método para recibir el array de filtros o argumentos separados
+    public function findByDni(?string $dni, ?string $fechaInicio, ?string $fechaFin, User $user): Collection
     {
-        // 1. Query base con relaciones profundas
+               // 1. Query base con relaciones profundas
         $query = EvaluacionCliente::with([
             // Datos completos del Cliente para Score y Modal
             'cliente.datos',
@@ -35,23 +36,28 @@ class BuscarEvaluacionService
             'aval'
         ])->latest(); 
 
-        // 2. FILTRO DINÁMICO
+        // 2. FILTRO POR DNI
         if (!empty($dni)) {
             $query->whereHas('cliente.datos', function ($q) use ($dni) {
                 $q->where('dni', 'like', "%{$dni}%");
             });
         }
 
-        // 3. SEGURIDAD POR ROL
+        // 3. NUEVO: FILTRO POR RANGO DE FECHAS
+        if (!empty($fechaInicio)) {
+            // startOfDay asegura que tome desde las 00:00:00
+            $query->whereDate('created_at', '>=', $fechaInicio);
+        }
+
+        if (!empty($fechaFin)) {
+            // endOfDay no es necesario si usas whereDate, pero asegura consistencia
+            $query->whereDate('created_at', '<=', $fechaFin);
+        }
+
+        // 4. SEGURIDAD POR ROL (Tu lógica existente)
         switch ($user->id_Rol) {
-            case 3: // Cliente
-                $query->where('id_Cliente', $user->id);
-                break;
-            case 4: // Asesor
-                $query->where('id_Asesor', $user->id);
-                break;
-            case 7: // Jefe
-                break;
+            case 3: $query->where('id_Cliente', $user->id); break;
+            case 4: $query->where('id_Asesor', $user->id); break;
         }
 
         return $query->get();

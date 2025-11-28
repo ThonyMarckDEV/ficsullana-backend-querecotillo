@@ -12,9 +12,9 @@ class IndexEvaluacionClienteRequest extends FormRequest
     public function rules(): array
     {
         return [
-            // Cambiamos 'required' por 'nullable'.
-            // Así, si el frontend no envía DNI, la validación pasa (para listar todo).
-            'dni' => 'nullable|string|max:20', 
+            'dni'          => 'nullable|string|max:20',
+            'fecha_inicio' => 'nullable|date', // Nueva regla
+            'fecha_fin'    => 'nullable|date|after_or_equal:fecha_inicio', // Nueva regla
         ];
     }
 }

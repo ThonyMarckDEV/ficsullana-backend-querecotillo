@@ -43,17 +43,23 @@ class EvaluacionClienteController extends Controller
      */
     public function index(IndexEvaluacionClienteRequest $request, BuscarEvaluacionService $finder): JsonResponse
     {
-        // Obtenemos el 'dni' validado (ahora puede ser null)
+        // 1. Obtener los datos validados
         $dni = $request->validated('dni');
+        $fechaInicio = $request->validated('fecha_inicio'); // <--- Nuevo
+        $fechaFin = $request->validated('fecha_fin');       // <--- Nuevo
 
+        // 2. Pasar los 4 argumentos al servicio
         $evaluaciones = $finder->findByDni(
-            $dni, 
-            $request->user()
+            $dni,           // 1. DNI
+            $fechaInicio,   // 2. Fecha Inicio
+            $fechaFin,      // 3. Fecha Fin
+            $request->user() // 4. Usuario
         );
 
         return response()->json($evaluaciones);
     }
 
+    
     /**
      * Almacena una nueva evaluación de cliente.
      */
