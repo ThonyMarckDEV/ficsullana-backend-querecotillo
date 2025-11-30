@@ -16,10 +16,9 @@ class BuscarEvaluacionService
      * @param User $user El usuario autenticado.
      * @return Collection
      */
-   // Actualiza la firma del método para recibir el array de filtros o argumentos separados
     public function findByDni(?string $dni, ?string $fechaInicio, ?string $fechaFin, User $user): Collection
     {
-               // 1. Query base con relaciones profundas
+     
         $query = EvaluacionCliente::with([
             // Datos completos del Cliente para Score y Modal
             'cliente.datos',

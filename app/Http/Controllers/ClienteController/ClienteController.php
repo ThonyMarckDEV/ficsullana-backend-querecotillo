@@ -17,16 +17,15 @@ class ClienteController extends Controller
     public function show($dni)
     {
         try {
-            // Cargar datos del cliente y sus avales históricos
+            
             $datos = Datos::with([
-                'usuario.avales', // Relación hasMany en User
+                'usuario.avales',
                 'contactos', 
                 'direcciones', 
                 'empleos', 
                 'cuentasBancarias'
             ])->where('dni', $dni)->firstOrFail();
 
-            // Buscamos la última evaluación rechazada (dato informativo)
             $evaluacion = EvaluacionClienteModel::whereHas('cliente.datos', function ($query) use ($dni) {
                 $query->where('dni', $dni);
             })->where('estado', 2)->latest()->first();
@@ -34,8 +33,6 @@ class ClienteController extends Controller
             return response()->json([
                 'datosCliente' => $datos,
                 'evaluacion'   => $evaluacion,
-                // CORRECCIÓN: Devolvemos la lista completa, no solo el primero.
-                // Si no tiene, devuelve array vacío.
                 'avales'       => $datos->usuario?->avales ?? [] 
             ]);
 
